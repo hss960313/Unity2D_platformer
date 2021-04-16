@@ -16,6 +16,18 @@ app.get('/lobby', function(req, res) {
 app.get('/MR', function(req, res) {
   res.sendFile(__dirname + '/ex/room.html');
 });
+app.post('/MR', function(req, res) {
+  var body ='';
+  req.on('data', function(data) {
+    body += data;
+  });
+  req.on('end', function() {
+    var s = qs.parse(body);
+    //LeaveRoom(s.sid, 'lobby');
+    //JoinRoom(s.sid, s.roomName);
+    res.sendFile(__dirname + `ex/inRoom.html?id=${s.roomName}`);
+  });
+});
 app.post('/lobby', function(req, res) {
 
   var body='';
@@ -25,7 +37,7 @@ app.post('/lobby', function(req, res) {
   req.on('end', function() {
     var post = qs.parse(body);
     res.sendFile(__dirname + `/ex/room.html`);
-    console.log("success")
+    console.log("success");
   });
 });
 var gameRoom = {};
