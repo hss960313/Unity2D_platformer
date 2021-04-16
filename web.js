@@ -1,6 +1,6 @@
 var express = require('express');
 var app = express();
-var http = require('http').createServer(app).listen(3000);
+var http = require('http').createServer(app).listen(8001);
 var io = require('socket.io').listen(http);
 var qs = require('querystring');
 var userCount = 0;
@@ -11,7 +11,7 @@ app.get('/', function(request, response) {
 });
 
 app.get('/lobby', function(req, res) {
-  res.sendFile(__dirname + '/ex/scrol.html'); 
+  res.sendFile(__dirname + '/ex/scrol.html');
 });
 app.get('/MR', function(req, res) {
   res.sendFile(__dirname + '/ex/room.html');
