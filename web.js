@@ -11,7 +11,7 @@ app.get('/', function(request, response) {
 });
 
 app.get('/lobby', function(req, res) {
-  res.sendFile(__dirname + '/ex/scrol.html');
+  res.sendFile(__dirname + '/ex/scrol.html'); 
 });
 app.get('/MR', function(req, res) {
   res.sendFile(__dirname + '/ex/room.html');
