@@ -1,0 +1,12 @@
+<body>
+    <input type="text" class="input">
+    <p class="p"></p>
+
+    <script>
+        var input = document.querySelector(".input");
+        var p = document.querySelector(".p");
+        input.onkeypress = function(e) {
+            p.innerHTML += e.keyCode + " ";
+        };
+    </script>
+</body>
