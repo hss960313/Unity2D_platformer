@@ -12,11 +12,8 @@ app.get('/', function(request, response) {
 });
 
 app.get('/game', function(req, res) {
-  res.sendFile(__dirname + '/ex/game.html');
+  res.sendFile(__dirname + 'ex/game.html');
 });
-app.get('/ex/roomHTML', function(req, res) {
-  res.sendFile(__dirname + '/ex/roomHTML');
-})
 
 
 var userCount = 0;
