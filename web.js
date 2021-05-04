@@ -8,7 +8,8 @@ var mysql = require('mysql');
 app.use(express.static(__dirname));
 
 app.get('/', function(request, response) {
-  response.sendFile(__dirname + '/index.html');
+  //response.sendFile(__dirname + '/index.html');
+  response.sendFile(__dirname + '/ex/game.html');
 });
 
 app.get('/game', function(req, res) {
