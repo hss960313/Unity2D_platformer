@@ -88,6 +88,7 @@ function lobbyChat_OK(data) {
 
 function lobbyChat_ERR() {
   alert("lobbyChat ERR");
+
 }
 
 function login_OK(sid) {
@@ -114,6 +115,7 @@ function realTime_lobby_OK(list) {
 
 function realTime_lobby_ERR() {
   alert('realTime err');
+  realTime_lobby_STOP();
 }
 
 function realTime_lobby_STOP() {
