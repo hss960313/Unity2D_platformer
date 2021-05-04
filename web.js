@@ -27,10 +27,17 @@ var realTime_userList_room = [];
 var realTime_roomList;
 
 var DB = mysql.createConnection({
+  /*
   host     : 'localhost',
   user     : 'root',
   password : 'sk!@3tkffleh',
   database : 'HSS'
+  */
+  host: "10.0.0.1",
+  port : "3306",
+  user: "node960313",
+  password : "sktkffleh!@3",
+  database : "node960313"
 });
 DB.connect();
 
