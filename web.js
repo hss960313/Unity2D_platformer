@@ -25,17 +25,19 @@ var realTime_userList_room = [];
 var realTime_roomList;
 
 var DB = mysql.createConnection({
-  /*
+
   host     : 'localhost',
   user     : 'root',
   password : 'sk!@3tkffleh',
   database : 'HSS'
-  */
+
+  /*
   host: "10.0.0.1",
   port : "3306",
   user: "node960313",
   password : "sktkffleh!@3",
   database : "node960313"
+  */
 });
 DB.connect();
 
@@ -79,7 +81,7 @@ io.on('connection', function(socket) {
   socket.on('login_Request', function(data) {
     socket.leave(socket.id);
     socket.join('lobby');
-    io.in('lobby').emit('ANNOUNCE_lobby', `새로운 사용자 ${socket.id} 님이 접속하ㄷ였습니다.`);
+    io.in('lobby').emit('ANNOUNCE_lobby', `새로운 사용자 ${socket.id} 님이 접속하였습니다.`);
     userCount++;
     socket.emit('login_Response', {
       answer : 'OK',
@@ -176,8 +178,8 @@ io.on('connection', function(socket) {
       ans = 'OK';
     else
       ans = 'ERR';
-
-    io.in(data.roomName).emit('roomChat_Response', {
+    console.log(ans);
+    io.in(data.rName).emit('roomChat_Response', {
       sid : socket.id,
       msg : data.msg,
       answer : ans

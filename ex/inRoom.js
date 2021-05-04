@@ -1,13 +1,14 @@
 function roomChat_Request() {
   ClientSoc.emit('roomChat_Request', {
-    roomName : Id('where').innerHTML,
+    rName : Id('where').innerHTML,
     msg : Id('room_msg').value
   });
   Id('room_msg').value = '';
 }
 
 ClientSoc.on('roomChat_Response', (response) => {
-  switch ( response.answer) {
+  console.log("resan = ", response.answer);
+  switch ( response.answer ) {
     case 'OK':
       roomChat_OK(response.sid, response.msg);
       break;
