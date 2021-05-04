@@ -4,13 +4,6 @@ var http = require('http').createServer(app).listen(8001);
 var io = require('socket.io').listen(http);
 var qs = require('querystring');
 var mysql = require('mysql');
-var DB = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : 'sk!@3tkffleh',
-  database : 'HSS'
-});
-DB.connect();
 
 app.use(express.static(__dirname));
 
@@ -32,7 +25,15 @@ var res = [];
 var realTime_userList_lobby;
 var realTime_userList_room = [];
 var realTime_roomList;
-var DBlike = [][5];
+
+var DB = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : 'sk!@3tkffleh',
+  database : 'HSS'
+});
+DB.connect();
+
 function initDB() {
   DB.query('truncate table socList', (error) => {
     if ( error ) {
@@ -66,6 +67,7 @@ function DB_deleteSoc(A) {
   });
 }
 initDB();
+
 io.on('connection', function(socket) {
   // 연결되면...
 
