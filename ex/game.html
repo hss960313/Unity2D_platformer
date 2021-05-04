@@ -1,0 +1,69 @@
+<html>
+<HEAD>
+  <TITLE>** GAME **</TITLE>
+  <script src="ex/socketio.js"></script>
+  <script>
+  var ClientSoc = io.connect();
+  function Id(id) {
+    return document.getElementById(id);
+  }
+  function fixBelow(chatbox) {
+    var objDiv = Id(chatbox);
+    objDiv.scrollTop = objDiv.scrollHeight;
+  }
+  </script>
+  <script src="ex/lobby.js"></script>
+  <script src="ex/createRoom.js"></script>
+  <script src="ex/joinProcess.js"></script>
+  <script src="ex/inRoom.js"></script>
+  <script src="https://www.promisejs.org/polyfills/promise-6.1.0.js"></script>
+  <script src="ex/start.js"></script>
+</HEAD>
+<link rel="stylesheet" href="/ex/lobby_style.css">
+<link rel="stylesheet" href="/ex/joinProcess_style.css">
+<link rel="stylesheet" href="/ex/inRoom_style.css">
+<link rel="stylesheet" href="/ex/start_style.css">
+<style>
+  #HEADER {
+    margin : 10px;
+    height : 50px;
+    width : 950px;
+
+    box-shadow: 5px 5px 5px black;
+    border: 1px solid black;
+  }
+#BODY {
+  margin : 10px;
+  width : 950px;
+  height : 720px;
+  border: 1px inset black;
+  box-shadow: 5px 5px 5px grey;
+}
+  #where {
+    position: absolute;
+    height: 35px;
+    width : 600px;
+
+    padding : 15px;
+  }
+  #my_socId {
+    position : absolute;
+    height : 35px;
+    width : 315px;
+
+    left : 600px;
+    padding: 15px;
+    text-align : right;
+  }
+</style>
+<body id="body_ALL">
+
+  <header id="HEADER">
+    <div id="where"></div>
+    <div id="my_socId"></div>
+  </header>
+  <div id ="BODY"></div>
+  <aisde id ="ASIDE"></aside>
+  <footer id = "FOOTER"></footer>
+</body>
+</html>

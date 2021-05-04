@@ -1,25 +1,281 @@
-<!doctype html>
-<html lang="en">
- <head>
-  <meta charset="UTF-8">
-  <meta name="Generator" content="EditPlus®">
-  <meta name="Author" content="">
-  <meta name="Keywords" content="">
-  <meta name="Description" content="">
-  <title>Document</title>
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+  <TITLE>ASD</TITLE>
+</HEAD>
+<BODY>
+  <script>
 
- <script>
+  </script>
+  <style>
+    #icon {
+      position : absolute;
+      top : 20px;
+      border-bottom : 2px dashed purple;
+      border-right : 2px dashed purple;
+      width : 185px;
+      height : 47px;
+      background-color : yellow;
+    }
+    #skills {
+      position : absolute;
+      top : 70px;
+      width : 185px;
+      height : 850px;
 
-    function pressEnter(){
-            alert("엔터키 활성화!");
     }
 
-</script>
+    #alive {
+      position : absolute;
+      left : 210px;
+      width : 795px;
+      height : 40px;
+      padding-top : 6px;
+      padding-left : 10px;
 
- </head>
- <body>
+      display : flex;
+      align-items : center;
+      font-size : 22px;
+    }
+    #nameSwitching {
+      position : absolute;
+      border: 15px solid black;
+      top : 65px;
+      left : 210px;
+      width : 740px;
+      height : 75px;
+      padding : 15px;
+      font-size : 20px;
 
-        텍스트 : <input type="text" onKeyDown="if(event.keyCode == 13) pressEnter()">
 
- </body>
-</html>
+    }
+    #game_chatBox {
+      position : absolute;
+
+      top : 210px;
+      left : 210px;
+      width : 785px;
+      height : 600px;
+
+      overflow-y : scroll;
+      padding-top : 10px;
+      padding-left : 15px;
+      font-size : 20px;
+      background-color : black;
+      color : white;
+    }
+    #radioBox {
+      position : absolute;
+      top : 830px;
+      left : 205px;
+      width : 800px;
+      height : 35px;
+
+      margin-top : 5px;
+    }
+    #game_typingBox {
+      position : absolute;
+      top : 875px;
+      left : 210px;
+      height : 40px;
+    }
+    #game_colorName {
+      position : absolute;
+      width : 35px;
+      height : 35px;
+      background-color : blue;
+      font-size : 20px;
+
+    }
+    #game_colon {
+      position : absolute;
+      margin-top : 3px;
+      left : 25px;
+      height : 30px;
+    }
+
+    #game_msg {
+      position : absolute;
+      left : 50px;
+      padding : 0;
+      width : 700px;
+      height : 30px;
+    }
+
+    #game_submit {
+      left : 760px;
+      position : absolute;
+      height : 35px;
+
+    }
+    .modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+     /* Could be more or less, depending on screen size */
+    width: 200px;
+    height : 350px;
+}
+  .close {
+    float : right;
+  }
+  </style>
+  <script>
+
+    function OK() {
+      var modal = document.getElementById('myModal');
+      modal.style.display = "block";
+      console.log("w");
+    }
+
+    function OK2() {
+      var modal = document.getElementById('myModal');
+      modal.style.display = "none";
+    }
+    function OK3() {
+      console.log("Awwewe");
+      document.getElementById('modalContent').innerHTML = "선택된 색 : <span style='background-color : red;'>　</span><p><input type='radio' name='g3' onclick='func2()'>알파<p>\
+      <input type='radio' name='g3'>베타<p>\
+      <input type='radio' name='g3'>카오스<p>\
+      <input type='radio' name='g3'>큐<p>\
+      <input type='radio' name='g3'>브이<p>\
+      <input type='radio' name='g3'>이브<p>\
+      <input type='radio' name='g3'>루비<p>\
+      <input type='radio' name='g3'>테토<p>\    <button id='submit' onclick='OK2();' disabled>제출</button><button id='submit' onclick='OK2();' style='float : right;'>사용취소</button>";
+    }
+    function OK4() {
+
+    }
+    function func2() {
+      document.getElementById('submit').disabled = false;
+    }
+    function openContent() {
+      document.getElementById('content').innerHTML = "<h2>당신은 알파(Alpha) 입니다</h2><h3>당신은 범인측의 리더로서 만약 당신이 검거되거나 죽게 되는경우 게임에서 패배합니다.</h3><h5> 탐정측의 캐릭터(Q, 브이, 이브, 루비,테토)를 모두 심판하거나, 탐정측이 검거를 실패할시 당신은 승리합니다.</h5>";
+    }
+    function closeContent() {
+      document.getElementById('content').innerHTML = ''
+    }
+     function func(color) {
+       console.log("c", color);
+      s = document.getElementsByName('rGroup');
+      for ( let i=0; i < s.length; i++) {
+        if ( s[i].checked == true) {
+          document.getElementById('next').disabled = false;
+        }
+      }
+    };
+    document.getElementsByName('rGroup').onclick = function() {
+      console.log("aweawe");
+      s = document.getElementsByName('rGroup');
+      for ( let i=0; i < s.length; i++) {
+        if ( s[i].checked == true)
+          document.getElementById('next').disabled = false;
+      }
+    };
+    function helpOn() {
+      console.log("helpon");
+      document.getElementById('helpDiv').style.display = "block";
+    }
+    function helpOff() {
+      document.getElementById('helpDiv').style.display = "none";
+    }
+    </script>
+    <div id="myModal" class="modal">
+
+     <!-- Modal content -->
+     <div id="modalContent" class="modal-content">
+       <input type="radio" name="rGroup" onclick="func(this.value);" value="red"><span style="background-color : red;" ">　</span></p>
+       <input type="radio" name="rGroup"><span style="background-color : blue; ">　</span></p>
+       <input type="radio" name="rGroup"><span style="background-color : green; ">　</span></p>
+       <input type="radio" name="rGroup"><span style="background-color : brown; ">　</span></p>
+       <input type="radio" name="rGroup"><span style="background-color : deeppink; ">　</span></p>
+       <input type="radio" name="rGroup"><span style="background-color : grey; ">　</span></p>
+       <input type="radio" name="rGroup"><span style="background-color : purple; ">　</span></p>
+       <input type="radio" name="rGroup"><span style="background-color : orange; ">　</span></p>
+       <button class="close" onclick="OK2();">취소</button>
+       <button id="next" onclick="OK3();" disabled>다음</button><p>
+     </div>
+
+   </div>
+   <div id="icon" >
+     캐릭터 썸네일(또는 이름)
+   </div>
+  <div id="skills" >
+    <button style="position : absolute; top: 50px; left : 10px; width : 120px; height : 50px; font-size : 15px;" onclick="OK();" onMouseOver="helpOn();" onMouseOut="helpOff();">스킬1 사용</button></p>
+    <button style="position : absolute; top: 200px; left : 10px;  width : 120px; height : 50px;  font-size : 15px;" onclick="OK();">스킬2 사용</button></p>
+    <button style="position : absolute; top: 350px; left : 10px;  width : 120px; height : 50px;  font-size : 15px;" onclick="OK();">스킬3 사용</button></p>
+    <button style="position : absolute; top: 500px; left : 10px;  width : 120px; height : 50px;  font-size : 15px;" onclick="OK();">스킬4 사용</button></p>
+  </div>
+  <div id="alive">
+  현재 생존자 :　　
+  <span style="background-color : red; height : 20px">　</span>　|　
+  <span style="background-color : blue; height : 20px">　</span>　|　
+  <span style="background-color : green; height : 20px">　</span>　|　
+  <span style="background-color : brown; height : 20px">　</span>　|　
+  <span style="background-color : deeppink; height : 20px">　</span>　|　
+  <span style="background-color : grey; height : 20px">　</span>　|　
+  <span style="background-color : purple; height : 20px">　</span>　|　
+  <span style="background-color : orange; height : 20px">　</span>
+</div>
+  <div id="nameSwitching">
+    이름교환 대기리스트
+      <button id="switching_apply" style="float : right; height : 35px; font-size : 17px;" disabled>
+        이미 이름교환 대기등록 중입니다..</button><p>
+      <span style="background-color : deeppink; height : 20px">　</span>　|　
+      <span style="background-color : blue; height : 20px">　</span>　|　
+      <span style="background-color : grey; height : 20px">　</span>　|　
+      <span style="background-color : orange; height : 20px">　</span>
+
+        <button id="switching_apply" style="float : right; height : 35px; font-size : 17px;">
+          취소</button>
+  </div>
+  <div id="game_chatBox">
+    !SYSTEM! 게임이 시작되었습니다.　　　　　　　　　　　　　　　　　　　　00:14<p>
+    <span style="background-color : red; height : 20px">　</span>　: 안녕하세요.　<p>
+    <span style="background-color : blue; height : 20px">　</span> (나)　: 안녕하세요.　<p>
+    <span style="background-color : green; height : 20px">　</span>　: 반갑습니다.　<p>
+
+  </div>
+  <div id="radioBox">
+    선택한 그룹에 채팅 :　　
+    <input type="radio" name="rGroup2" value="all" checked="">전체　　　
+    <input type="radio" name="rGroup2" value="aly">동맹　　　
+    <input type="radio" name="rGroup2" value="dead">관전　　　
+  </div>
+  <div id="game_typingBox">
+    <input type="hidden" id="inRoom_rName">
+    <span id="game_colorName">　</span>
+    <span id="game_colon">　:　</span>
+    <input type="text" id="game_msg" onKeyDown="if( event.keyCode == 13) gameChat_Request();"/>
+    <button id="game_submit" onclick="gameChat_Request()">Chat</button>
+  </div>
+  <div id="aside" style="position: absolute; left : 1030px; top: 100px; font-size : 30px;">
+    <button onclick="openContent();" style="width : 200px; height : 50px; font-size : 20px;">내 역할 자세히 보기</button>
+    <button onclick="closeContent();" style="width : 200px; height : 50px; font-size : 20px;">내용 접기</button>
+    <div id="content"></div>
+  </div>
+  <div id="helpDiv" style="position: absolute; top: 170px;
+  left : 50px;
+   width : 400px;
+   height : 100px;
+   background-color: #FFD732;
+   border : 1px solid black;
+   z-index = 1;
+   display : none;
+   ">스킬1 설명</div>
+</HTML>

@@ -1,0 +1,87 @@
+#room_head {
+  width : 580px;
+  height : 30px;
+  padding : 15PX;
+  float: left;
+
+}
+#room_nowUsers {
+  float: left;
+  width : 340px;
+  display : flex;
+  justify-content: center;
+  align-items: center;
+  text-align : center;
+  height: 60px;
+}
+
+#room_chatBox {
+  position : absolute;
+  top : 130px;
+  width : 600px;
+  height : 600px;
+  margin : 5px;
+  overflow-y : scroll;
+  background-color : black;
+  color : white;
+}
+#room_usersNow {
+  position : absolute;
+  top : 135px;
+  left : 615px;
+
+  width : 340px;
+  height : 600px;
+
+
+  text-align : center;
+  overflow-y : scroll;
+  float : left;
+}
+#room_sid {
+  margin : 5px;
+  width : 100px;
+  height : 30px;
+  text-align : center;
+}
+#room_msg {
+  width : 450px;
+  height : 30px;
+}
+
+#room_typingBox {
+  margin-top : 5px;
+  color : white;
+  position : absolute;
+  top : 730px;
+
+}
+#room_sid {
+  width : 100px;
+  height : 30px;
+  text-align : center;
+}
+#room_msg {
+  width : 450px;
+  height : 30px;
+}
+
+
+#room_submit {
+  height : 30px;
+}
+#playGame {
+  margin-right : 15px;
+  width : 165px;
+  padding: 5px;
+}
+#BACK {
+  margin-left : 15px;
+  width : 165px;
+  padding: 5px;
+}
+#READY {
+  margin-left : 15px;
+  width : 165px;
+  padding: 7px;
+}

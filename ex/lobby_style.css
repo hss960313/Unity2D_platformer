@@ -1,0 +1,71 @@
+#lobby_head {
+  width : 580px;
+  height : 30px;
+  padding : 15PX;
+  float: left;
+
+}
+#lobby_nowUsers {
+  float: left;
+  width : 340px;
+  display : flex;
+  justify-content: center;
+  align-items: center;
+  text-align : center;
+  height: 60px;
+}
+
+#lobby_chatBox {
+  position : absolute;
+  top : 130px;
+  width : 600px;
+  height : 600px;
+  margin : 5px;
+  overflow-y : scroll;
+  background-color : black;
+  color : white;
+}
+#lobby_usersNow {
+  position : absolute;
+  top : 135px;
+  left : 615px;
+
+  width : 340px;
+  height : 600px;
+
+
+  text-align : center;
+  overflow-y : scroll;
+  float : left;
+}
+#lobby_typingBox {
+  color : white;
+  position : absolute;
+  top : 735px;
+
+}
+#lobby_sid {
+  margin : 5px;
+  width : 100px;
+  height : 30px;
+  text-align : center;
+}
+#lobby_msg {
+  width : 450px;
+  height : 30px;
+}
+
+
+#lobby_submit {
+  height : 30px;
+}
+#create_room {
+  margin-right : 15px;
+  width : 270px;
+  padding: 5px;
+}
+#join_room {
+  margin-left : 15px;
+  width : 270px;
+  padding: 5px;
+}

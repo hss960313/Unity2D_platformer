@@ -1,0 +1,23 @@
+<div id="room_headContainer">
+<div id="room_head">
+  <!-- 방 만들기 시 자동으로 그 방으로 입장됩니다. !-->
+  <button id="playGame" onclick="playGame()" disabled>게임시작</button>
+  <button id="BACK" onclick="BACK_Request()">로비로</button>
+  <button id="READY" onclick="READY_Request()">READY</button>
+</div>
+<div id="room_nowUsers">room 접속자</div>
+</div>
+<div id="room_chatContainer">
+  <div id="room_chatBox">
+      <ul id="room_chat">
+        <li>&lt;!SYSTEM&gt;-room-환영합니다.</li>
+      </ul>
+  </div>
+  <div id="room_usersNow"></div>
+  </div>
+  <div id="room_typingBox">
+    <input type="hidden" id="inRoom_rName">
+    <input type="text" id="room_sid" readonly/>
+    <input type="text" id="room_msg" onKeyDown="if( event.keyCode == 13) roomChat_Request();"/>
+    <button id="room_submit" onclick="roomChat_Request()">Chat</button>
+  </div>

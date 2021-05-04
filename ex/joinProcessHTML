@@ -1,0 +1,9 @@
+<div id="joinProcess">
+<div id="joinProcess_head">
+방 리스트</div>
+<div id="joinProcess_list">
+</div>
+<input text type="hidden" id="joinProcess_rName">
+<button id="toLobby" onclick="toLobby()">로비로 이동</button>
+<button id="toRoom" onclick="JOIN_Request()" style="display : none">입장</button>
+</div>
