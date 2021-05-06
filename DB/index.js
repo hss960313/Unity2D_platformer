@@ -17,7 +17,7 @@ DB.connect = function(connection) {
 DB.init = function(connection) {
   connection.query('truncate table socList', (error) => {
     if ( error ) {
-      console.log("truncate soclist err", error);
+      console.log("truncate soclist err");
       connection.query(`CREATE TABLE socList (
         sid VARCHAR(30) PRIMARY KEY,
         nickname VARCHAR(30),
@@ -25,13 +25,13 @@ DB.init = function(connection) {
         isRdy VARCHAR(10),
         isStart VARCHAR(10)
         )`, (error)=> {
-        if ( error) console.log("create soclist err",error);
+          if ( error) console.log("create soclist err");
       });
     }
   });
   connection.query('truncate table gameList', (error)=> {
     if ( error) {
-      console.log("truncate gameList err", error);
+      console.log("truncate gameList err");
       connection.query(`CREATE TABLE gameList (
         Alpha VARCHAR(30),
         Beta VARCHAR(30),
@@ -41,7 +41,7 @@ DB.init = function(connection) {
         EVE  VARCHAR(30),
         RUBY  VARCHAR(30),
         TETTO  VARCHAR(30))`, (error)=> {
-        if ( error) console.log("create gameList err", error);
+          if ( error) console.log("create gameList err");
       });
     }
   });
