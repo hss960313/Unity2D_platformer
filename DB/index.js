@@ -6,7 +6,7 @@ DB.create = function(mysql, host, port, user, pwd, db) {
     host     : host,  // 10.0.0.1
     port     : port, // 3306
     user     : user, // node960313
-    password : pwd, // sk!@3tkffleh
+    password : pwd, // sktkffleh!@3
     database : db // node960313
   });
   return connection;
