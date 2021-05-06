@@ -8,8 +8,8 @@ const DB = require('./DB');
 const lobby = require('./SERVER_lobbyJS');
 const inRoom = require('./SERVER_inRoomJS');
 const joinProcess = require('./SERVER_joinProcessJS');
-var serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
-//var serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sk!@3tkffleh', 'node960313');
+//var serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
+var serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sk!@3tkffleh', 'node960313');
 app.use(express.static(__dirname));
 
 app.get('/', function(request, response) {
