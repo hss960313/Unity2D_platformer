@@ -13,8 +13,7 @@ var serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sk!@3tkffleh'
 app.use(express.static(__dirname));
 
 app.get('/', function(request, response) {
-  //response.sendFile(__dirname + '/index.html');
-  response.sendFile(__dirname + '/ex/game.html');
+  response.sendFile(__dirname + '/index.html');
 });
 
 app.get('/game', function(req, res) {
@@ -27,8 +26,12 @@ var gameRoom = [];
 var res = [];
 DB.connect(serverDB);
 DB.init(serverDB);
+console.log("");
+console.log("");
+console.log("server on");
+console.log("");
+console.log("");
 io.on('connection', function(socket) {
-
 
   socket.on('login_Request', () =>  {
     lobby.Login(socket);
@@ -120,6 +123,10 @@ io.on('connection', function(socket) {
 
 process.on('SIGINT', function() {
   DB.end(serverDB);
-  console.log("web.js exit");
+  console.log("");
+  console.log("");
+  console.log("server off");
+  console.log("");
+  console.log("");
   process.exit();
 });
