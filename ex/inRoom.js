@@ -1,3 +1,4 @@
+
 function roomChat_Request() {
   ClientSoc.emit('roomChat_Request', {
     rName : Id('where').innerHTML,
@@ -42,7 +43,7 @@ function BACK_Request() {
 }
 
 ClientSoc.on('BACK_Response', (answer) => {
-  switch ( answer) {
+  switch ( answer ) {
     case 'OK':
       BACK_OK();
     break;
@@ -52,19 +53,21 @@ ClientSoc.on('BACK_Response', (answer) => {
   }
 });
 function BACK_OK(data) {
-    fetch_lobbyHTML().then(function(response) {
-      realTime_inRoom_STOP();
-      ClientSoc.emit("BACK_COMPLETED", Id('where').innerHTML);
-      return 0;
-    }).then(function(value) {
-      Id('where').innerHTML = 'lobby';
-      realTime_lobby_Request();
+    fetch_lobbyHTML().then(function(resolve) {
+      STOP_inRoom_events(resolve);
     });
 }
 function BACK_ERR() {
   alert("BACK ERR");
 }
-
+function STOP_inRoom_events(res) {
+  if ( res == 0 ) {
+    realTime_inRoom_STOP();
+    ClientSoc.emit("BACK_COMPLETED", Id('where').innerHTML);
+    Id('where').innerHTML = 'lobby';
+    realTime_lobby_Request();
+  }
+}
 var realTime_inRoom;
 function realTime_inRoom_Request() {
   realTime_inRoom = setInterval(function() {
@@ -168,5 +171,7 @@ function fetch_startHTML() {
 }
 function playGame() {
   realTime_inRoom_STOP();
-  fetch_startHTML();
+  fetch_startHTML().then(function(resolve) {
+    ClientSoc.emit('StartGame', Id('where').innerHTML)
+  });
 }

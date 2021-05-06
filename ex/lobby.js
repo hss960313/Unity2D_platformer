@@ -95,9 +95,8 @@ function login_OK(sid) {
   Id('my_socId').innerHTML = "나 :  "+sid;
   Id('lobby_sid').value = sid;
 
-  thisSocId = sid;
   var welcome = document.createElement('li');
-  welcome.innerHTML = "접속했습니다. "+thisSocId +"(나)";
+  welcome.innerHTML = "접속했습니다. "+sid +"(나)";
   welcome.setAttribute("style", "background-color : #373a3c; color : white;");
   Id('lobby_chat').appendChild(welcome);
 

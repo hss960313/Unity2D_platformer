@@ -1,148 +1,233 @@
-var http = require('http');
-var fs = require('fs');
-var url = require('url');
-var qs = require('querystring');
-var Home = require('./classex.js');
-var io = require('socket.io');
-
-function templateSOCKET() {
-  return
-}
-function templateHTML(title, list, script, body) {
-  return `<!doctype html>
-  <html>
-  <head>
-  <title>WEB1 - ${title}</title>
-  <meta charset="utf-8">
-  </head>
-  <body>
-  <script>${script}</script>
-  <h1><a href="/">WEB</a></h1>
-  ${list}
-  ${body}
-  </body>
-  </html>
-  `;
-}
-
-function templateList(filelist) {
-  var list = '<ul>';
-  var i=0;
-  while (i < filelist.length) {
-    list = list+`<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
-    i += 1;
-  }
-  list += '</ul>';
-  return list;
-}
-
-var app = http.createServer(function(request, response) {
-    var _url = request.url;
-    var qd = url.parse(_url, true).query;
-    var pathname = url.parse(_url, true).pathname;
-    console.log("qd.id = " +qd.id+" pathname = "+pathname);
-    if ( pathname == '/') {  //한정된 경로(없는경우, create, create_process, delete, delete_process, Text폴더내 파일)로 들어오는경우
-      if ( qd.id == undefined) {      //지정된 경로가 없는경
-        fs.readdir('./Text', function(error, filelist) {
-
-          var title = "Welcome!";
-          var description = "Hello, Node.js!"
-          var list = templateList(filelist);
-          var template = templateHTML(title, list, body=description);
-          response.writeHead(200);
-          response.end(template);
+function initDB() {
+  DB.query('truncate table socList', (error) => {
+    if ( error ) {
+      DB.query(`CREATE TABLE socList (
+        sid VARCHAR(30) PRIMARY KEY,
+        rName VARCHAR(20),
+        rdy VARCHAR(10),
+        isStart VARCHAR(10),
+        role VARCHAR(20)
+        )`, (error)=> {
+        if ( error) console.log( error);
         });
-      }
-      else { // Text 폴더내 파일로 들어오는 경우.
-        var title = qd.id;
-        fs.readdir('./Text', function(error, filelist){
-          fs.readFile(`Text/${title}`, 'utf8', function(err, description){
-            var list = templateList(filelist);
-            var template = templateHTML(title, list, body=`
-            <a href="/create">create</a>
-            <a href="/update?id=${title}">update</a>
-            <h2>${title}</h2>
-            <p>${description}</p>
-            `);
-            response.writeHead(200);
-            response.end(template);
-          });
-        });
-      }
     }
-    else if (pathname == "/create") {
-      var title = "WEB-create";
-      fs.readdir('./Text', function(error, filelist){
-        fs.readFile(`Text/${title}`, 'utf8', function(err, description){
-          var list = templateList(filelist);
-          var ip_addr = request.headers['x-forwarded-for'] || request.connection.remoteAddress;
-          var template = templateHTML(title, list, body=`
-          <form action="/create_process" method="post">
-          <p><input type="hidden" name="ip" value="${ip_addr}"></p>
-            <p><input type="text" name="title" placeholder="title"></p>
-          <p><textarea name="description" placeholder="description"></textarea></p>
-          <p><input type="submit"></p>
-          </form>`);
-          response.writeHead(200);
-          response.end(template);
-        });
-      });
+  });
+}
+function DB_insertSoc(A) {
+  DB.query(`INSERT INTO socList VALUES(?, 'lobby', false, false, null)`, [A], (err)=> {
+    if ( err)
+      console.log(err);
+  });
+}
+function DB_updateRoom(rName, sid) {
+  DB.query('UPDATE socList SET rName = ? where sid= ?', [rName, sid], (err) => {
+    if ( err )
+      console.log(err);
+  });
+}
+function DB_deleteSoc(A) {
+  DB.query('DELETE FROM socList where sid= ?',
+   [A], (err) => { if (err) console.log(err);
+  });
+}
+initDB();
+
+io.on('connection', function(socket) {
+  // 연결되면...
+
+  socket.on('login_Request', function(data) {
+    socket.leave(socket.id);
+    socket.join('lobby');
+    io.in('lobby').emit('ANNOUNCE_lobby', `새로운 사용자 ${socket.id} 님이 접속하였습니다.`);
+    userCount++;
+    socket.emit('login_Response', {
+      answer : 'OK',
+      sid : socket.id
+    });
+    // var s = io.sockets.adapter.sids[`${socket.id}`];
+    console.log(`userCount : ${userCount}, sid = ${socket.id} connected`);
+    DB_insertSoc(`${socket.id}`);
+  });
+
+  socket.on('createRoom_Request', function(roomName) {
+    var rooms = io.sockets.adapter.rooms;
+    var ans;
+    var rName = roomName.replace('/', '');
+    if ( (roomName == '') || roomName == undefined )
+      ans = 'ERR';
+    else {
+      for ( var k in rooms)
+        if ( k == rName )
+          ans = 'X';
+      if ( ans == undefined )
+        ans = 'OK';
     }
-    else if ( pathname == "/create_process") {
-      var body = '';
-      request.on('data', function(data) {
-        body = body + data;
+
+    socket.emit('createRoom_Response', {
+      answer : ans,
+      rName : roomName
+    });
+  });
+  socket.on('joinProcessHTML_Request', () => {
+    let roomList = socket.adapter.rooms;
+    let i =0, ans;
+    for (let k in roomList)
+      i++;
+    if ( i == 1 )
+      ans = 'ERR';
+    if ( ans == undefined)
+      ans = 'OK';
+    socket.emit('joinProcessHTML_Response', ans);
+  });
+
+  socket.on('JOIN_Request', function(rName) {
+    io.in(rName).clients(function(err, clients) {
+      let ans;
+      if ( clients.length == 8 )
+        ans = 'ERR';
+      else
+        ans = 'OK';
+
+      socket.emit('JOIN_Response', {
+        answer : ans,
+        sid : socket.id,
+        rName : rName
       });
-      request.on('end', function() {
-        var t2 = new Home(body, response);
-        console.log("id = "+ t2.ip);
-        console.log("title = "+ t2.title);
-        console.log("description = " + t2.description);
-      });
-      response.end();
-    }
-    else if(pathname === '/update'){
-      fs.readdir('/Text', function(error, filelist){
-        fs.readFile(`Text/${qd.id}`, 'utf8', function(err, description){
-          var title = qd.id;
-          var list = templateList(filelist);
-          var template = templateHTML(title, list,body=
-          `<a href="/create">create</a>
-            <form action="/update_process" method="post">
-              <input type="hidden" name="idx" value="${title}">
-              <p><input type="text" name="title" placeholder="title" value="${title}"></p>
-              <p><textarea name="description" placeholder="description">${description}</textarea>
-              </p>
-              <p><input type="submit">
-              </p>
-            </form>`
-          );
-          response.writeHead(200);
-          response.end(template);
-        });
-      });
-    } else if(pathname === '/update_process') {
-      var body = '';
-      request.on('data', function(data) {
-        body = body + data;
-      });
-      request.on('end', function() {
-        var post = qs.parse(body);
-        var id = post.id;
-        var title = post.title;
-        var description = post.description;
-        fs.rename(`Text/${idx}`, `Text/${title}`, function(error){
-          fs.writeFile(`Text/${title}`, description, 'utf8', function(err) {
-            // 페이지 리다이렉팅.
-            response.writeHead(302, { Location: `/?id=${title}`});
-            response.end();
-          })
-        });
-      });
-  }
-  else {
-    response.writeHead(404);
-    response.end('Not Found');
-  }
+    });
+  });
+
+  socket.on('JOIN_COMPLETED', function(roomName) {
+    socket.join(roomName);
+    socket.leave('lobby');
+    DB_updateRoom(roomName, socket.id);
+
+    io.in('lobby').emit('ANNOUNCE_lobby', `사용자 ${socket.id} 님이 로비에서 나갔습니다.`);
+    io.in(roomName).emit('ANNOUNCE_room', ` 사용자 ${socket.id} 님이 ${roomName}에 접속했습니다.`);
+  });
+
+  //ROOM 에서 lobby로 BACK
+  socket.on('BACK_Request', function(roomName) {
+    let ans;
+    ans = 'OK';
+
+    socket.emit('BACK_Response', ans);
+  });
+
+  socket.on('BACK_COMPLETED', function(roomName) {
+    socket.join('lobby');
+    socket.leave(roomName);
+    io.in('lobby').emit('ANNOUNCE_lobby', ` 사용자
+    ${socket.id} 님이 로비에 접속했습니다.`);
+
+    io.in(roomName).emit('ANNOUNCE_room', ` 사용자 ${socket.id} 님이 ${roomName}에서 나갔습니다.`);
 });
-app.listen(3000);
+
+  socket.on('lobbyChat_Request', function(msg) {
+    io.in('lobby').emit('lobbyChat_Response', {
+      sid : socket.id,
+      msg : msg,
+      answer : 'OK'
+    });
+  });
+
+  //broadcast
+  socket.on('roomChat_Request', function(data) {
+    var ans;
+    if ( data.rName != undefined && data.rName.replace('/', '') == data.rName)
+      ans = 'OK';
+    else
+      ans = 'ERR';
+    console.log(ans);
+    io.in(data.rName).emit('roomChat_Response', {
+      sid : socket.id,
+      msg : data.msg,
+      answer : ans
+    });
+
+  });
+   socket.on('realTime_roomList_Request', function(data) {
+    let roomList = socket.adapter.rooms;
+
+    let usersNum = [];
+    let i =0, j=0, tr;
+    let ans;
+    for (let k in roomList)
+      i++;
+    if ( i == 1 )
+      ans = 'ERR';
+    else
+      ans = 'OK';
+    if ( ans == 'OK')
+      for (let k in roomList)
+        usersNum.push(io.sockets.adapter.rooms[k].length);
+    socket.emit('realTime_roomList_Response', {
+      answer : ans,
+      list : roomList,
+      NoC : usersNum
+    });
+});
+  socket.on('realTime_lobby_Request', function() {
+    let roomList = socket.adapter.rooms;
+    let ans, i;
+    //console.log("roomList = ",roomList);
+    for ( let j in roomList) {
+      i++;
+    }
+    for ( let k in roomList) {
+      if ( k == 'lobby') {
+        ans = 'OK';
+
+        break;
+      }
+    }
+    if ( ans == undefined )
+      ans = 'ERR';
+    socket.emit('realTime_lobby_Response', {
+      answer : ans,
+      list : io.sockets.adapter.rooms['lobby']
+    });
+  });
+
+socket.on('realTime_inRoom_Request', (rName) => {
+  let ans;
+  if ( rName != 'lobby' && rName.replace('/', '') == rName )
+    ans = 'OK';
+  else
+    ans = 'ERR';
+  socket.emit('realTime_inRoom_Response', {
+    answer : ans,
+    list : io.sockets.adapter.rooms[rName]
+  });
+});
+
+
+  socket.on('forceDisconnect', function() {
+   console.log('user forceDisconnected');
+   //socket.disconnect();
+   userCount--;
+   if ( userCount < 0) {
+     userCount = 0;
+   }
+  })
+
+  socket.on('disconnect', function() {
+   console.log(`user ${socket.id} Disconnected`);
+   DB_deleteSoc(`${socket.id}`);
+   //socket.disconnect();
+   userCount--;
+   if ( userCount < 0) {
+     userCount = 0;
+   }
+  });
+
+  socket.on('ready_Request', function(isReady) {
+    //DB_updateRDY(socket.id, isReady);
+
+    //let nowreadys = DB_nowReady(data.rName);
+    //let ans;
+    socket.emit('ready_Response', {
+      answer : 'OK',
+      nowready : 1
+    })
+  });
+});

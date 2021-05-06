@@ -101,6 +101,7 @@ function realTime_roomList_OK(data) {
   }
     joinList(data);
 }
+
 function realTime_roomList_ERR() {
   alert("real-time 오류입니다. 로비로 이동합니다.");
   toLobby();
@@ -110,24 +111,24 @@ function realTime_roomList_STOP() {
 }
 function joinList(data) {
   var NoC = data.NoC;
-  var i=0;
-  for ( var k in data.list ) {
-    if ( k != 'lobby') {
+  var list = data.list;
+  for (var i=0; i < list.length; i++) {
+
+    if ( list[i] != 'lobby') {
       var ul = document.createElement('ul');
-      ul.innerHTML = k + " : " +NoC[i];
+      ul.innerHTML = list[i] + " : " +NoC[i];
 
       var add = document.createAttribute("id");
       add.value = "joinProcess_ul";
 
       ul.setAttributeNode(add);
       ul.onclick = adj_rName;
-      //ul.addEventListener("click", JR(k));
+
       var add2 = document.createAttribute("value");
-      add2.value = k;
+      add2.value = list[i];
       ul.setAttributeNode(add2);
       Id('joinProcess_list').appendChild(ul);
     }
-    i++;
   }
 };
 // 방이름을 클릭하면 입장버튼을 보이게함

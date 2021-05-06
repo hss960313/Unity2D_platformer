@@ -15,10 +15,11 @@ ClientSoc.on('createRoom_Response', (response) => {
       break;
   }
 });
-
+var room;
 function createRoom_OK(rName) {
   alert("방이 생성되었습니다.");
   ClientSoc.emit('JOIN_Request', rName);
+  room = rName;
 }
 function createRoom_X(rName) {
   alert(rName+"는 이미 있는 방 이름입니다. 다른 이름을 입력해 주세요");
