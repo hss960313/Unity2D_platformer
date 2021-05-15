@@ -12,11 +12,11 @@ lobby.Login =  (socket)=>{
 }
 
 
-lobby.Chat =  (socket, msg)=>{
+lobby.Chat =  (socket, msg)=> {
   socket.to('lobby').emit('lobbyChat_Response', {
     sid : socket.id,
     msg : msg,
-    answer : 'OK'
+    answer : 'ADD'
   });
 }
 lobby.realTime = (socket)=> {

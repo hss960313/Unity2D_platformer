@@ -1,6 +1,12 @@
+<div id="modal_Back" class="modal">
+  <div id="BacklobbyAfter5sec" class='modal-content'></div>
+</div>
+<div id="modal_gameOver" class="modal">
+  <div id="Announce_gameOver" calss="modal-content"></div>
+</div>
+
 <div id="lobby_headContainer">
 <div id="lobby_head">
-  <!-- 방 만들기 시 자동으로 그 방으로 입장됩니다. !-->
   <button id="create_room" onclick="createRoomHTML()">방 만들기</button>
   <button id="join_room" onclick="joinProcessHTML_Request()">방 참가</button>
 </div>

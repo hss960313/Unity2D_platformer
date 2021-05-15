@@ -1,17 +1,22 @@
 
 function roomChat_Request() {
-  ClientSoc.emit('roomChat_Request', {
-    rName : Id('where').innerHTML,
-    msg : Id('room_msg').value
-  });
-  Id('room_msg').value = '';
-}
+  if (Id('inRoom_msg').value != '') {
+    var li = document.createElement('li');
+    li.innerHTML = ""+ Id('inRoom_sid').value + '(나) : ' + Id('inRoom_msg').value;
+    Id('inRoom_chat').appendChild(li);
 
+    ClientSoc.emit('roomChat_Request', {
+      rName : Id('where').innerHTML,
+      msg : Id('room_msg').value
+    });
+    Id('room_msg').value = '';
+  }
+}
 ClientSoc.on('roomChat_Response', (response) => {
   console.log("resan = ", response.answer);
   switch ( response.answer ) {
-    case 'OK':
-      roomChat_OK(response.sid, response.msg);
+    case 'ADD':
+      roomChat_ADD(response.sid, response.msg);
       break;
     case 'ERR':
       roomChat_ERR();
@@ -19,7 +24,7 @@ ClientSoc.on('roomChat_Response', (response) => {
 
   }
 });
-function roomChat_OK(sid, msg) {
+function roomChat_ADD(sid, msg) {
   var li = document.createElement('li');
   li.innerHTML = sid + ' : ' + msg;
   Id('room_chat').appendChild(li);
@@ -39,40 +44,54 @@ ClientSoc.on('ANNOUNCE_room', function(data) {
   }
 });
 function BACK_Request() {
-  ClientSoc.emit('BACK_Request', Id('where').innerHTML);
+  if (Id('game_chatBox')) { //게임시작 후 room에 나갔을때
+    let rName = Id('inRoom_rName').value;
+    initBODY_ALL(rName, Id('sid').value);
+    ClientSoc.emit('BACK_gameOver', rName);
+  }
+  else //게임시작 전에 room에서 나갔을때
+    ClientSoc.emit('BACK_beforeGame', Id('where').innerHTML)
 }
-
-ClientSoc.on('BACK_Response', (answer) => {
-  switch ( answer ) {
+function initBODY_ALL(rName, sid) {
+  Id('body_ALL').innerHTML = ""+`<header id="HEADER">
+      <div id="where">${rName}</div>
+      <div id="my_socId">나 : ${sid}</div>
+    </header>
+    <div id ="BODY"></div>
+    <aisde id ="ASIDE"></aside>
+    <footer id = "FOOTER"></footer>`;
+}
+ClientSoc.on('BACK_Response', (response) => {
+  switch ( response.answer ) {
     case 'OK':
-      BACK_OK();
+      BACK_OK(response.sid);
     break;
     case 'ERR':
       BACK_ERR();
     break;
   }
 });
-function BACK_OK(data) {
+function BACK_OK(sid) {
     fetch_lobbyHTML().then(function(resolve) {
-      STOP_inRoom_events(resolve);
+      realTime_inRoom_STOP();
+      ClientSoc.emit("BACK_COMPLETED", Id('where').innerHTML);
+      Id('where').innerHTML = 'lobby';
+      Id('lobby_sid').value = sid;
+      realTime_lobby_Request();
     });
 }
 function BACK_ERR() {
   alert("BACK ERR");
 }
-function STOP_inRoom_events(res) {
-  if ( res == 0 ) {
-    realTime_inRoom_STOP();
-    ClientSoc.emit("BACK_COMPLETED", Id('where').innerHTML);
-    Id('where').innerHTML = 'lobby';
-    realTime_lobby_Request();
-  }
-}
 var realTime_inRoom;
+var isroomupdate = false;;
 function realTime_inRoom_Request() {
+  isroomupdate = true;
+  ClientSoc.emit('realTime_inRoom_Request', Id('where').innerHTML);
   realTime_inRoom = setInterval(function() {
+    if ( Id('where') != undefined )
     ClientSoc.emit('realTime_inRoom_Request', Id('where').innerHTML);
-  }, 500);
+  }, 1000);
 }
 ClientSoc.on('realTime_inRoom_Response', (response)=> {
   switch ( response.answer) {
@@ -97,6 +116,7 @@ function realTime_inRoom_ERR() {
 
 function realTime_inRoom_STOP() {
   clearInterval(realTime_inRoom);
+  isroomupdate = false;
 }
 
 
@@ -116,10 +136,16 @@ ClientSoc.on('ready_Response', (response) => {
   }
 });
 function ready_OK(count) {
+  Id('start').disabled = false;
+}
+/*
+
+
+function ready_OK(count) {
   if ( count == 1 )
-    Id('playGame').disabled = false; // 보이게
+    Id('start').disabled = false; // 보이게
   else
-    Id('playGame').disabled = true; // 안보이게
+    Id('start').disabled = true; // 안보이게
   if ( isReady ) {
     Id('READY').setAttribute("style", "background-color : red");
     Id('READY').innerHTML = 'READY 취소';
@@ -127,27 +153,29 @@ function ready_OK(count) {
   else {
     Id('READY').setAttribute("style", "background-color : default");
     Id('READY').innerHTML = 'READY';
-    Id('playGame').disabled = true; // 안보이게
+    Id('start').disabled = true; // 안보이게
   }
 }
+*/
 function ready_ERR() {
  alert("ready ERR");
 }
 
 function update_inRoom_userList(list) {
-  while ( Id('room_usersNow').hasChildNodes() ) {
-    Id('room_usersNow').removeChild(Id('room_usersNow').firstChild);
-  }
-  var i=0;
-  for ( var k in list ) {
-    i++;
-    var li = document.createElement('li');
-    li.innerHTML = k;
-    Id('room_usersNow').appendChild(li);
-  }
-  Id('room_nowUsers').innerHTML = ""+Id('where').innerHTML+" 접속자 : "+i+" 명";
+  if ( isroomupdate == true) {
+    while ( Id('room_usersNow').hasChildNodes() ) {
+      Id('room_usersNow').removeChild(Id('room_usersNow').firstChild);
+    }
+    var i=0;
+    for ( var k in list ) {
+      i++;
+      var li = document.createElement('li');
+      li.innerHTML = k;
+      Id('room_usersNow').appendChild(li);
+    }
+    Id('room_nowUsers').innerHTML = ""+Id('where').innerHTML+" 접속자 : "+i+" 명";
+    }
 }
-
 function fetch_lobbyHTML() {
   return new Promise(function(resolve, reject) {
     fetch('/ex/lobbyHTML').then(function(response) {
@@ -159,19 +187,7 @@ function fetch_lobbyHTML() {
     });
   });
 }
-function fetch_startHTML() {
-  return new Promise(function(resolve, reject) {
-    fetch('/ex/startHTML').then(function(response) {
-      response.text().then(function(text) {
-        Id('body_ALL').innerHTML = text;
-        resolve(0);
-      })
-    })
-  })
-}
-function playGame() {
-  realTime_inRoom_STOP();
-  fetch_startHTML().then(function(resolve) {
-    ClientSoc.emit('StartGame', Id('where').innerHTML)
-  });
+
+function start_Request() {
+  ClientSoc.emit('start_Request', Id('where').innerHTML);
 }

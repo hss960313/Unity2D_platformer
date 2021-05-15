@@ -4,7 +4,10 @@ inRoom.BACK = (socket, roomName) =>{
   let ans;
   ans = 'OK';
 
-  socket.emit('BACK_Response', ans);
+  socket.emit('BACK_Response', {
+    answer : ans,
+    sid : socket.id
+  });
 }
 
 inRoom.BACK_COMPLETED = (socket, roomName) =>{
@@ -20,7 +23,7 @@ inRoom.BACK_COMPLETED = (socket, roomName) =>{
 inRoom.Chat = (socket, data) => {
   var ans;
   if ( data.rName != undefined && data.rName.replace('/', '') == data.rName)
-    ans = 'OK';
+    ans = 'ADD';
   else
     ans = 'ERR';
 

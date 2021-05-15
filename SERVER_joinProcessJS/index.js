@@ -13,11 +13,13 @@ joinProcess.HTML = (socket) => {
   socket.emit('joinProcessHTML_Response', ans);
 }
 
-joinProcess.JOIN = function(socket, rName, io) {
+joinProcess.JOIN = function(socket, rName, io, gameList) {
   io.in(rName).clients(function(err, clients) {
     let ans;
-    if ( clients.length == 8 )
-      ans = 'ERR';
+    if ( clients.length >= 8)
+      ans = 'OVER';
+    else if ( gameList[rName] != undefined )
+      ans = 'LATE';
     else
       ans = 'OK';
 

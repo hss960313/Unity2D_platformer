@@ -1,0 +1,97 @@
+<input type='hidden' id='sid'>
+  <div id="modal_Color" class="modal">
+     <div id="selectColor" class="modal-content"></div>
+  </div>
+  <div id="modal_Role" class="modal">
+    <div id="selectRole" class="modal-content"></div>
+  </div>
+  <div id="modal_Prompt" class="modal">
+    <div id="typingPrompt" class="modal-content"></div>
+  </div>
+  <div id="modal_Death" class="modal">
+    <div id="selectBackorHere" class='modal-content'></div>
+  </div>
+  <div id="modal_Back" class="modal">
+    <div id="BacklobbyAfter5sec" class='modal-content'></div>
+  </div>
+  <div id="modal_gameOver" class="modal">
+    <div id="Announce_gameOver" calss="modal-content"></div>
+  </div><button id="BacklobbyAfter" onclick='after5sec();' style="margin-right : 4px;">로비로 이동</button>
+  <div class="help" id="help0">
+    <button id="show_result" onclick='showResult();' disabled>결과창 보기</button>
+  </div>
+  <div id="timeflow">00 : 00
+  </div>
+   <div id="icon" ></p>
+     내 역할 :　　V
+     <input type="hidden" id="myRole" value="V">
+     <input type="hidden" id="myColor">
+     <input type='hidden' id="isAlive" value="true">
+   </div>
+
+  <div id="skills" >
+    <input type="hidden" id="selectedSkill">
+    <input type="hidden" id="selectedColor">
+    <input type="hidden" id="selectedRole">
+    <div class="help" id="help1">
+    <button class="Skillbutton" value = '1' id='Q확인'>Q확인 사용</button></p>
+    </div>
+    <div class="help"id="help2">
+    <button class="Skillbutton" value = '5' id='감시'>감시 사용</button></p>
+    </div>
+    <div class="help" id="help3">
+    <button class="Skillbutton" value='0' id='동맹' >동맹하기</button></p>
+    </div>
+    <div class="help" id="help4">
+    <button class="Skillbutton" id='방송하기' disabled>방송하기</button></p>
+    </div>
+  </div>
+
+  <div id="alive">
+  현재 생존자(8) :　
+  <img src="colorBox/red.jpg" />　|　
+  <img src="colorBox/blue.jpg" />　|　
+  <img src="colorBox/green.jpg" />　|　
+  <img src="colorBox/brown.jpg" />　|　
+  <img src="colorBox/grey.jpg" />　|　
+  <img src="colorBox/orange.jpg" />　|　
+  <img src="colorBox/purple.jpg" />　|　
+  <img src="colorBox/deeppink.jpg" />
+</div>
+  <div id="nameSwitching">
+  <div id="nameSwitching_left">이름교환 대기리스트 : </div>
+  <div id="nameSwitching_right">
+      <button id="switching_apply" value='ADD' onclick="nameSwitching_ChangeRequest(this.value)">
+        등록하기</button>
+        <button id="switching_cancel" value='Cancel' onclick="nameSwitching_ChangeRequest(this.value)">
+          취소</button>
+    </div>
+  </div>
+  <div id="game_chatBox">
+    !S Y S T E M ! 　　게임이 시작되었습니다.<p>
+
+  </div>
+  <div id="radioBox">
+  선택한 그룹에 채팅 :　　
+  <input type="hidden" id="selectedWhom" value="전체">
+  <input type="radio" onclick ="whom(this.value);" name="rGroup2" value="전체" checked="" id="toAll">전체　　　
+  <input type="radio" id="toAlly" onclick ="whom(this.value);" name="rGroup2" value="동맹">동맹　　　
+  <input type="radio" id="toBy" onclick ="whom(this.value);" name="rGroup2" value="관전자">관전　　　
+  </div>
+  <div id="game_typingBox">
+    <input type="hidden" id="inRoom_rName">
+    <span id="game_colorName">　</span>
+    <span id="game_colon">　:　</span>
+    <input type="text" id="game_msg" onKeyDown="if( event.keyCode == 13) gameChat_Request();"/>
+    <button id="game_submit" onclick="gameChat_Request();">Chat</button>
+  </div>
+  <div id="byside">
+  <button id="detail" onclick="contentView();" >내 역할 자세히 보기</button>
+    <div id="detailContent"></div>
+  </div>
+  <div id="helpDiv"></p>색깔 하나와 이름 하나를 골라 그 색깔의 참가자의 정체가 그 이름이라면 게임에서 제외한다.
+  (재사용 대기시간 60초)<p>
+4번 실패하는 경우 게임에서 패배한다.</p>
+Q가 죽기전에는 상대가 V인경우에는 죽일 수 없다.</p>
+같은 이름을 두 번 실패하면 그 이름은 심판할 수 없다.</p>
+</div>

@@ -39,7 +39,7 @@ ClientSoc.on('joinProcessHTML_Response', (answer) => {
     break;
   }
 });
-
+var isroomlistupdate = false;
  function joinProcessHTML_OK() {
   fetch_joinProcessHTML().then(function(resolve) {
     realTime_roomList_Request(resolve);
@@ -59,8 +59,11 @@ ClientSoc.on('JOIN_Response', (response)=> {
     case 'OK':
       JOIN_OK(response);
     break;
-    case 'ERR':
-      JOIN_ERR();
+    case 'OVER':
+      JOIN_OVER();
+    break;
+    case 'LATE':
+      JOIN_LATE();
     break;
   }
 });
@@ -73,18 +76,22 @@ function JOIN_OK(data) {
   });
 }
 
-function JOIN_ERR() {
-  alert("JOIN_ERR");
+function JOIN_OVER() {
+  alert("해당 방은 꽉찬방입니다.");
+}
+function JOIN_LATE() {
+  alert("해당 방은 이미 게임이 시작된 방입니다.");
 }
 var realTime_roomList;
 function realTime_roomList_Request(res) {
+  isroomlistupdate = true;
+  ClientSoc.emit('realTime_roomList_Request', '');
   if ( res == 0 )
   realTime_roomList = setInterval(function() {
     ClientSoc.emit('realTime_roomList_Request', '');
-  }, 500);
+  }, 1000);
 }
 ClientSoc.on('realTime_roomList_Response', (response) => {
-
   switch ( response.answer) {
     case 'OK':
       realTime_roomList_OK(response);
@@ -96,18 +103,22 @@ ClientSoc.on('realTime_roomList_Response', (response) => {
 });
 function realTime_roomList_OK(data) {
   console.log('roomList received');
-  while ( Id('joinProcess_list').hasChildNodes()) {
-    Id('joinProcess_list').removeChild(Id('joinProcess_list').firstChild);
-  }
+  if ( isroomlistupdate == true) {
+    while ( Id('joinProcess_list').hasChildNodes()) {
+      Id('joinProcess_list').removeChild(Id('joinProcess_list').firstChild);
+    }
     joinList(data);
+  }
 }
 
 function realTime_roomList_ERR() {
   alert("real-time 오류입니다. 로비로 이동합니다.");
+  realTime_roomList_STOP();
   toLobby();
 }
 function realTime_roomList_STOP() {
   clearInterval(realTime_roomList);
+  isroomlistupdate = false;
 }
 function joinList(data) {
   var NoC = data.NoC;

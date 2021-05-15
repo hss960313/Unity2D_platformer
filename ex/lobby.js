@@ -10,6 +10,7 @@ window.onload = function() {
     })
   });
 }
+var islobbyupdate = true;
 function login_Request() {
   ClientSoc.emit('login_Request', '');
 }
@@ -25,15 +26,20 @@ ClientSoc.on('login_Response', (response) => {
 });
 
 function lobbyChat_Request() {
-  ClientSoc.emit('lobbyChat_Request', Id('lobby_msg').value
-  );
-  Id('lobby_msg').value = '';
+  if ( Id('lobby_msg').value != '') {
+    var li = document.createElement('li');
+    li.innerHTML = ""+ Id('lobby_sid').value + '(나) : ' + Id('lobby_msg').value;
+    Id('lobby_chat').appendChild(li);
+    ClientSoc.emit('lobbyChat_Request', Id('lobby_msg').value
+    );
+    Id('lobby_msg').value = '';
+  }
 };
 
 ClientSoc.on('lobbyChat_Response', (response)=> {
   switch (response.answer) {
-    case 'OK':
-      lobbyChat_OK(response);
+    case 'ADD':
+      lobbyChat_ADD(response);
       break;
     case 'ERR':
       lobbyChat_ERR();
@@ -42,9 +48,11 @@ ClientSoc.on('lobbyChat_Response', (response)=> {
 });
 var realTime_lobby;
 function realTime_lobby_Request() {
+  islobbyupdate = true;
+  ClientSoc.emit('realTime_lobby_Request', '');
   realTime_lobby = setInterval(function(){
     ClientSoc.emit('realTime_lobby_Request', '');
-  }, 500);
+  }, 1000);
 }
 
 ClientSoc.on('realTime_lobby_Response', function(data) {
@@ -77,7 +85,7 @@ ClientSoc.on('ANNOUNCE_lobby', function(data) {
 });
 
 
-function lobbyChat_OK(data) {
+function lobbyChat_ADD(data) {
   var li = document.createElement('li');
   li.innerHTML = ""+ data.sid + ' : ' + data.msg;
   Id('lobby_chat').appendChild(li);
@@ -104,7 +112,6 @@ function login_OK(sid) {
 }
 function login_ERR() {
   alert("login err");
-  //login_Request();
 }
 
 function realTime_lobby_OK(list) {
@@ -119,6 +126,7 @@ function realTime_lobby_ERR() {
 
 function realTime_lobby_STOP() {
   clearInterval(realTime_lobby);
+  islobbyupdate = false;
 }
 function createRoomHTML() {
   Id('BODY').style.display = "none";
@@ -130,15 +138,17 @@ function createRoomHTML() {
 });
 }
 function update_userList_lobby(list) {
-  while ( Id('lobby_usersNow').hasChildNodes() ) {
-    Id('lobby_usersNow').removeChild(Id('lobby_usersNow').firstChild);
-  }
-  var i=0;
-  for ( var k in list ) {
-    i++;
-    var li = document.createElement('li');
-    li.innerHTML = k;
-    Id('lobby_usersNow').appendChild(li);
-  }
-  Id('lobby_nowUsers').innerHTML = "로비 접속자 : "+i+" 명";
+  if ( islobbyupdate == true) {
+    while ( Id('lobby_usersNow').hasChildNodes() ) {
+      Id('lobby_usersNow').removeChild(Id('lobby_usersNow').firstChild);
+    }
+    var i=0;
+    for ( var k in list ) {
+      i++;
+      var li = document.createElement('li');
+      li.innerHTML = k;
+      Id('lobby_usersNow').appendChild(li);
+    }
+    Id('lobby_nowUsers').innerHTML = "로비 접속자 : "+i+" 명";
+    }
 }

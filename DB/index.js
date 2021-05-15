@@ -25,14 +25,16 @@ DB.init = function(connection) {
         isRdy VARCHAR(10),
         isStart VARCHAR(10)
         )`, (error)=> {
-          if ( error) console.log("create soclist err");
+          if ( error) console.log("soclist already existed");
       });
     }
+    else console.log('truncate socList ok');
   });
   connection.query('truncate table gameList', (error)=> {
     if ( error) {
       console.log("truncate gameList err");
       connection.query(`CREATE TABLE gameList (
+        gName VARCHAR(20),
         Alpha VARCHAR(30),
         Beta VARCHAR(30),
         Chaos VARCHAR(30),
@@ -41,36 +43,102 @@ DB.init = function(connection) {
         EVE  VARCHAR(30),
         RUBY  VARCHAR(30),
         TETTO  VARCHAR(30))`, (error)=> {
-          if ( error) console.log("create gameList err");
+          if ( error) console.log("gameList already existed.");
       });
     }
+    else console.log('truncate gameList ok');
   });
 }
-DB.insert = function(connection, sid) {
+DB.insert_newSoc = function(connection, sid) {
   connection.query(`INSERT INTO socList VALUES(?, '', 'lobby', false, false)`, [sid], (err)=> {
     if ( err)
-      console.log("inser err",err);
+      console.log("insert_newSoc err");
+    else
+      console.log("insert_newSoc ok");
   });
 }
-DB.updateLocation = function(connection, location, sid) {
+DB.insert_newGame = function(connection, gName) {
+  connection.query("INSERT INTO gameList (gName) VALUES(?)", [gName], (err) =>{
+    if ( err) console.log("insertgame err");
+    else console.log("insert_newGame ok");
+  });
+}
+DB.start = function(connection, gName, soclist) {
+  for (let k=0; k < soclist.length; k++) {
+    connection.query('UPDATE socList SET isStart = ? where sid = ?', [true, soclist[k]], (err) =>{
+      if (err) console.log("start err");
+    });
+  }
+}
+DB.update_Location = function(connection, location, sid) {
   connection.query('UPDATE socList SET nowLocation = ? where sid= ?', [location, sid], (err) => {
-    if ( err )
-      console.log("updateLocation err",err);
-  });
-}
-DB.updateRole = function(connection, role, sid, rName) {
-  connection.query('UPDATE gameList SET ? = ? where rName = ?', [role, sid, rName], (err) => {
-    if ( err )
-      console.log("updateRole err",err);
-  });
-}
-DB.delete = function(connection, sid) {
-  connection.query('DELETE FROM socList where sid= ?',
-   [sid], (err) => { if (err) console.log("delete err",err);
+    if ( err ) console.log("updateLocation err");
+    else console.log("updateLocation ok");
   });
 }
 
+DB.update_Role = function(connection, role, soc, gname) {
+  connection.query('update gameList SET '+role+' = ? where gName = ?', [soc, gname], (err, res)=> {
+    if (err) console.log("roleupdate err ");
+    else console.log("roleupdate ok");
+  });
+}
+DB.delete_Soc = function(connection, sid) {
+  connection.query('DELETE FROM socList where sid= ?',
+   [sid], (err) => { if (err) console.log("deleteSoc err");
+   else console.log("deleteSoc ok");
+  });
+}
+DB.delete_Game = function(connection, gName) {
+  connection.query('DELETE FROM gameList where gName = ?', [gName], (err) =>{
+    if (err) console.log("deleteGame err");
+    else console.log("deleteGame ok");
+  })
+}
 DB.end = function(connection) {
   connection.end();
+}
+
+DB.get_SOCPRACTICE = async function(conn, rName, list) {
+  list = [];
+  var a = await Q(conn, 'select sid from socpractice', list);
+}
+DB.get_socList = async function(conn, rName, list) {
+
+  var a = await QQ(conn, rName, list);
+  console.log("soclist in rName(",rName,") = ",list);
+}
+
+function Q(conn, query, list) {
+  return new Promise((resolve, reject)=>{
+    conn.query(query, (err, rows)=> {
+    if ( err)
+      console.log("Q err");
+    else {
+      for (var k=0; k < rows.length; k++) {
+      list.push(rows[k].sid);
+      if (k == rows.length-1)
+        resolve(0);
+      }
+    }
+    });
+  });
+}
+function QQ(conn, rName, list) {
+  return new Promise((resolve, reject)=>{
+    conn.query('select sid from socList where nowLocation = ?', [rName], (err, rows)=> {
+    if ( err)
+      console.log("QQ err");
+    else {
+      for (var k=0; k < rows.length; k++) {
+        console.log(rows[k].sid);
+        list.push(rows[k].sid);
+
+        if (k == rows.length-1)
+          resolve(0);
+      }
+    }
+    });
+  });
 }
 module.exports = DB;
