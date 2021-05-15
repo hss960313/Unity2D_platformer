@@ -16,12 +16,17 @@ const inRoom = require('./SERVER_inRoomJS');
 const joinProcess = require('./SERVER_joinProcessJS');
 const universal = require('./SERVER_universalJS');
 const TIME = require('./SERVER_TimeJS');
-const evil = require('./SERVER_evilJS');
-const good = require('./SERVER_goodJS');
-const serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
 
-//const serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sktkffleh!@3', 'node960313');
+//const serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
 
+const serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sktkffleh!@3', 'node960313');
+const GOOD = require('./SERVER_goodJS');
+const EVIL = require('./SERVER_evilJS');
+DB.connect(serverDB)
+  .then(()=>{
+    good = new GOOD(DB, serverDB, io);
+    evil = new EVIL(DB, serverDB, io);
+  });
 const COLORS = ['red', 'blue', 'green', 'brown', 'grey', 'orange', 'purple', 'deeppink'];
 const ROLES = ['Alpha', 'Beta', 'Chaos','Q','V','Eve','Ruby','Tetto'];
 
@@ -46,7 +51,6 @@ var timetable = {};
 var gameList = {};
 var switchingList = {};
 var wait_submit = {};
-DB.connect(serverDB);
 DB.init(serverDB);
 io.on('connection', function(socket) {
 /*
@@ -62,13 +66,13 @@ io.on('connection', function(socket) {
   socket.on('universal', (request)=>{
     universal.server(io, socket, request, gameList);
   });
+  */
   socket.on('good', (request)=>{
-    good.server(io, socket, request, gameList);
+    good.skill(socket, request, gameList);
   });
   socket.on('evil', (request)=>{
-    evil.server(io, socket, request, gameList);
+    evil.skill(socket, request, gameList);
   });
-  */
   socket.on('login_Request', () =>  {
     lobby.Login(socket);
     userCount++;

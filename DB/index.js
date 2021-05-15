@@ -1,6 +1,7 @@
 
 var DB = {};
 var connection;
+
 DB.create = function(mysql, host, port, user, pwd, db) {
   var connection =  mysql.createConnection({
     host     : host,  // 10.0.0.1
@@ -12,7 +13,10 @@ DB.create = function(mysql, host, port, user, pwd, db) {
   return connection;
 }
 DB.connect = function(connection) {
-  connection.connect();
+  return new Promise(function(resolve, reject) {
+    connection.connect();
+    resolve(0);
+  })
 }
 DB.init = function(connection) {
   connection.query('truncate table socList', (error) => {
@@ -99,9 +103,9 @@ DB.end = function(connection) {
   connection.end();
 }
 
-DB.get_SOCPRACTICE = async function(conn, rName, list) {
-  list = [];
+DB.get_SOCPRACTICE = async function(conn, list) {
   var a = await Q(conn, 'select sid from socpractice', list);
+
 }
 DB.get_socList = async function(conn, rName, list) {
 
@@ -127,8 +131,10 @@ function Q(conn, query, list) {
 function QQ(conn, rName, list) {
   return new Promise((resolve, reject)=>{
     conn.query('select sid from socList where nowLocation = ?', [rName], (err, rows)=> {
-    if ( err)
+    if ( err) {
       console.log("QQ err");
+      console.log(err);
+    }
     else {
       for (var k=0; k < rows.length; k++) {
         console.log(rows[k].sid);

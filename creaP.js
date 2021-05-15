@@ -1,12 +1,13 @@
-const TIME = require('./SERVER_TimeJS');
-var flow = new classe();
-
-var se = setInterval(()=>{
-  flow.setSecond();
-  console.log(flow.getSecond());
-  if ( flow.getSecond() == 60) {
-    flow.setMinutes();
-    flow.zeroSecond();
-  }
-  console.log(flow.printTime());
-}, 1000);
+const DB = require("./DB");
+const mysql = require('mysql');
+const serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
+const GOOD = require('./SERVER_goodJS');
+var connected;
+var kk;
+const good = require('./SERVER_goodJS');
+DB.connect(serverDB)
+  .then(()=>{
+    kk = new GOOD(DB, serverDB);
+    console.log(kk);
+  });
+  //kk.get_socList();
