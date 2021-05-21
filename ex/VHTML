@@ -15,7 +15,7 @@
     <div id="BacklobbyAfter5sec" class='modal-content'></div>
   </div>
   <div id="modal_gameOver" class="modal">
-    <div id="Announce_gameOver" calss="modal-content"></div>
+    <div id="Announce_gameOver" class="modal-content"></div>
   </div><button id="BacklobbyAfter" onclick='after5sec();' style="margin-right : 4px;">로비로 이동</button>
   <div class="help" id="help0">
     <button id="show_result" onclick='showResult();' disabled>결과창 보기</button>
@@ -37,13 +37,13 @@
     <button class="Skillbutton" value = '1' id='Q확인'>Q확인 사용</button></p>
     </div>
     <div class="help"id="help2">
-    <button class="Skillbutton" value = '5' id='감시'>감시 사용</button></p>
+    <button class="Skillbutton" value = '4' id='감시'>감시 사용</button></p>
     </div>
     <div class="help" id="help3">
-    <button class="Skillbutton" value='0' id='동맹' >동맹하기</button></p>
+    <button class="Skillbutton" value='-1' id='동맹하기' >동맹하기</button></p>
     </div>
     <div class="help" id="help4">
-    <button class="Skillbutton" id='방송하기' disabled>방송하기</button></p>
+    <button class="Skillbutton" id='방송하기' value = '-1' disabled>방송하기</button></p>
     </div>
   </div>
 
@@ -60,6 +60,7 @@
 </div>
   <div id="nameSwitching">
   <div id="nameSwitching_left">이름교환 대기리스트 : </div>
+  <div id='nameSwitching_middle'></div>
   <div id="nameSwitching_right">
       <button id="switching_apply" value='ADD' onclick="nameSwitching_ChangeRequest(this.value)">
         등록하기</button>

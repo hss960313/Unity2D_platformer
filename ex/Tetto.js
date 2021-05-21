@@ -5,21 +5,23 @@ ClientSoc.on('timeflow', (response) => {
     Id('timeflow').innerHTML = ""+ response.minutes + " : "+ response.second;
     flowCount++;
   }
-  //
+  if (flowCount >= 2100) {
+    BACK_Request();
+  }
+
   if ( flowCount == 150 ) {
-    Id('이름훔치기').disabled = false;
+    time_skils.pop();
   }
 });
-var deathCount = 0;
-ClientSoc.on('DEATH', (death) =>{
-  if ( death.color == Id('myColor').value )
-    myDEATH();
-  else
-    delColor(death.color);
-  deathCount++;
-  if ( deathCount == 1) {
+var time_skills = ['이름훔치기'];
 
-  }
+ClientSoc.on('DEATH', (death) =>{
+    if ( death.color == Id('myColor').value )
+      myDEATH();
+    else
+      delColor(death.color);
+    briefing(death.color, death.announce);
+
 });
 function skill_Request() {
   switch ( Id('selectedSkill').value ) {
@@ -30,32 +32,24 @@ function skill_Request() {
   //알파, Q, V 에겐 거짓이름이 나타난다.
 }
 function skill_emit() {
-  switch ( Id('selectedSkill').value) {
-    case '이름훔치기':
-      ClientSoc.emit('Tetto', {
-
-      });
-    break;
-  }
+  let e = Id('selectedSkill').value;
+  let eName;
+  if ( e == '이름훔치기') eName = 'Tetto';
+  ClientSoc.emit('good', {
+    eventName : eName,
+    rName : Id('inRoom_rName').value,
+    color : Id('selectedColor').value
+  })
 }
-function myDEATH() {
-  Id('isAlive').value = 'false';
-  //스킬들 disabled
+ClientSoc.on('Tetto', (response)=> {
+
+});
+function skill_disabled() {
   Id('이름훔치기').disabled = true;
-//대기리스트 등록 , 취소 disabled
-  Id('switching_apply').disabled = true;
-  Id('switching_cancel').disabled = true;
-  //생존자리스트에서 내색깔 제거
-  delColor(Id('myColor').value);
-  //관전자 채팅만할수있게 제한하기.
-  Id('toAll').disabled = true;
-  Id('toAll').checked = false;
-  Id('toAlly').disabled = true;
-  Id('toBy').checked = true;
-  Id('toBy').disabled = true;
-  whom('관전자');
-  //death-modal
-  deathmodal_Open();
-  //관전자방으로 이동
-  ClientSoc.emit('go_bystander', Id('inRoom_rName').value);
+}
+function skill_abled() {
+  var sql = reUseWaitList.indexOf('이름훔치기');
+  var sql2 = time_skills.indexOf('이름훔치기');
+  if ( !sql && !sql2 )
+    Id('이름훔치기').disabled = false;
 }

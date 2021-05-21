@@ -35,7 +35,7 @@ function roomChat_ERR() {
   console.log('roomChat ERR');
 }
 
-ClientSoc.on('ANNOUNCE_room', function(data) {
+ClientSoc.on('ANNOUNCE_inRoom', function(data) {
   var li = document.createElement('li');
   li.innerHTML = data;
   if ( Id('room_chat') != undefined ) {
@@ -45,9 +45,16 @@ ClientSoc.on('ANNOUNCE_room', function(data) {
 });
 function BACK_Request() {
   if (Id('game_chatBox')) { //게임시작 후 room에 나갔을때
-    let rName = Id('inRoom_rName').value;
-    initBODY_ALL(rName, Id('sid').value);
-    ClientSoc.emit('BACK_gameOver', rName);
+    var isyouwin = '';
+    console.log("isgameOver= ", isgameOver);
+    if ( isgameOver == true)
+      isyouwin = isWin(whowin, Id('myRole').value);
+    ClientSoc.emit('BACK_gameOver', {
+      rName : Id('inRoom_rName').value,
+      isgameOver : isgameOver,
+      isWin : isyouwin
+    });
+    initBODY_ALL(Id('inRoom_rName').value, Id('sid').value);
   }
   else //게임시작 전에 room에서 나갔을때
     ClientSoc.emit('BACK_beforeGame', Id('where').innerHTML)

@@ -40,6 +40,8 @@ lobby.realTime = (socket)=> {
     list : socket.adapter.rooms['lobby']
   });
 }
-
+lobby.ANNOUNCE = (io, announce)=>{
+  io.in('lobby').emit('ANNOUNCE_lobby', announce);
+}
 
 module.exports = lobby;

@@ -5,23 +5,24 @@ ClientSoc.on('timeflow', (response) => {
     Id('timeflow').innerHTML = ""+ response.minutes + " : "+ response.second;
     flowCount++;
   }
-  //
-});
-var deathCount = 0;
-ClientSoc.on('DEATH', (death) =>{
-  if ( death.color == Id('myColor').value )
-    myDEATH();
-  else
-    delColor(death.color);
-  deathCount++;
-  if ( deathCount == 1) {
-
+  if (flowCount >= 2100) {
+    BACK_Request();
   }
+});
+
+ClientSoc.on('DEATH', (death) =>{
+
+    if ( death.color == Id('myColor').value )
+      myDEATH();
+    else
+      delColor(death.color);
+    briefing(death.color, death.announce);
+
 });
 function skill_Request() {
   switch ( Id('selectedSkill').value ) {
     case '알파검거':
-      skill_ColorRole(0, '범인을 검거합니다.');
+      skill_onlyColor(0, '범인을 검거합니다.');
       break;
     case '동맹':
       skill_onlyColor(3, '동맹하기');
@@ -33,44 +34,33 @@ function skill_Request() {
   //Q는 모든 명교의 진실,거짓을 알수있다. 단 어떤 직업을 냈는지는 알수없다.
 }
 function skill_emit() {
-  switch ( Id('selectedSkill').value) {
-    case '알파검거':
-      ClientSoc.emit('arrest', {
-
-      });
-    break;
-    case '동맹':
-      ClientSoc.emit('ally', {
-
-      });
-    break;
-    case '방송':
-      ClientSoc.emit('broadcast', {
-
-      });
-      break;
+    let e =  Id('selectedSkill').value;
+    let eName;
+    if ( e == '알파검거') eName = 'arrest';
+    else if ( e == '동맹하기') eName = 'ally';
+    else if ( e == '방송하기') eName = 'broadcast';
+    ClientSoc.emit('good', {
+      eventName : eName,
+      rName : Id('inRoom_rName').value,
+      color : Id('selectedColor').value,
+      prompt : Id('promptText').value
+    });
   }
 }
-function myDEATH() {
-  Id('isAlive').value = 'false';
-  //스킬들 disabled
+ClientSoc.on('arrest', (response)=>{
+  if ( response.isArrest == 'O') {
+    briefing('', '알파를 검거했습니다. 당신의 승리입니다.');
+  }
+  else {
+    briefing(response.color, '는 알파가 아닙니다. 당신은 죽을 것입니다.');
+  }
+});
+
+function skill_disabled() {
   Id('알파검거').disabled = true;
-  Id('동맹').disabled = true;
-  Id('방송').disabled = true;
-//대기리스트 등록 , 취소 disabled
-  Id('switching_apply').disabled = true;
-  Id('switching_cancel').disabled = true;
-  //생존자리스트에서 내색깔 제거
-  delColor(Id('myColor').value);
-  //관전자 채팅만할수있게 제한하기.
-  Id('toAll').disabled = true;
-  Id('toAll').checked = false;
-  Id('toAlly').disabled = true;
-  Id('toBy').checked = true;
-  Id('toBy').disabled = true;
-  whom('관전자');
-  //death-modal
-  deathmodal_Open();
-  //관전자방으로 이동
-  ClientSoc.emit('go_bystander', Id('inRoom_rName').value);
+  Id('동맹하기').disabled = true;
+  Id('방송하기').disabled = true;
+}
+function skill_abled() {
+
 }

@@ -53,6 +53,27 @@ DB.init = function(connection) {
     else console.log('truncate gameList ok');
   });
 }
+DB.connect = function(connection) {
+  return new Promise(function(resolve, reject) {
+    connection.connect();
+    resolve(0);
+  })
+}
+DB.getLoca = async function(connection, sid, list) {
+  var a = await QQQ(connection, sid, list)
+
+}
+function QQQ(connection, sid, list) {
+  return new Promise(function(resolve, reject){
+    connection.query('select nowLocation from socList where sid = ?', [sid], (err, result)=>{
+      if ( err) console.log('getLoca err');
+      else {
+        list.push(result[0]);
+        resolve(0);
+      }
+    });
+  })
+}
 DB.insert_newSoc = function(connection, sid) {
   connection.query(`INSERT INTO socList VALUES(?, '', 'lobby', false, false)`, [sid], (err)=> {
     if ( err)
@@ -89,8 +110,9 @@ DB.update_Role = function(connection, role, soc, gname) {
 }
 DB.delete_Soc = function(connection, sid) {
   connection.query('DELETE FROM socList where sid= ?',
-   [sid], (err) => { if (err) console.log("deleteSoc err");
-   else console.log("deleteSoc ok");
+   [sid], (err) => {
+    if (err) console.log("deleteSoc err");
+    else console.log("deleteSoc ok");
   });
 }
 DB.delete_Game = function(connection, gName) {
@@ -133,7 +155,6 @@ function QQ(conn, rName, list) {
     conn.query('select sid from socList where nowLocation = ?', [rName], (err, rows)=> {
     if ( err) {
       console.log("QQ err");
-      console.log(err);
     }
     else {
       for (var k=0; k < rows.length; k++) {

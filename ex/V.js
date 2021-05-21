@@ -5,18 +5,17 @@ ClientSoc.on('timeflow', (response) => {
     Id('timeflow').innerHTML = ""+ response.minutes + " : "+ response.second;
     flowCount++;
   }
-  //
-});
-var deathCount = 0;
-ClientSoc.on('DEATH', (death) =>{
-  if ( death.color == Id('myColor').value )
-    myDEATH();
-  else
-    delColor(death.color);
-  deathCount++;
-  if ( deathCount == 1) {
-
+  if (flowCount >= 2100) {
+    BACK_Request();
   }
+});
+ClientSoc.on('DEATH', (death) =>{
+    if ( death.color == Id('myColor').value )
+      myDEATH();
+    else
+      delColor(death.color);
+    briefing(death.color, death.announce);
+
 });
 function skill_Request() {
   switch ( Id('selectedSkill').value ) {
@@ -26,71 +25,77 @@ function skill_Request() {
     case '감시':
       skill_onlyColor(60, '카오스를 감시합니다.');
       break;
-    case '동맹':
-      skill_onlyColor(3, '동맹하기');
+    case '동맹하기':
+      skill_onlyColor(3, '동맹을 맺습니다.');
       break;
-    case '방송':
+    case '방송하기':
       skill_Prompt(120, 'Q의 이름으로 방송합니다.');
       break;
-    case '검거':
-      skill_ColorRole(0, 'Q를 대신해 알파를 검거합니다.');
+    case '알파검거':
+      skill_onlyColor(0, 'Q를 대신해 알파를 검거합니다.');
     break;
   }
   //V 는 Q확인을 사용하지 않으면 감시스킬을 2번 더 사용할수 있다.
   // 루비와 만나거나, 교란일 때 베타를 만나면 자동동맹된다.
 }
 function skill_emit() {
-  switch ( Id('selectedSkill').value) {
-    case 'Q확인':
-      ClientSoc.emit('V_1', {
-
-      });
-    break;
-    case '감시':
-      ClientSoc.emit('V_2', {
-
-      });
-    break;
-    case '동맹':
-      ClientSoc.emit('ally', {
-
-    });
-    break;
-    case '방송하기':
-      ClientSoc.emit('broadcast', {
-
-      });
-      break;
-    case '알파검거':
-      ClientSoc.emit('arrest', {
-
-    });
-    break;
-  }
+  let e = Id('selectedSkill').value;
+  let eName;
+  if ( e == 'Q확인') eName = 'V_1';
+  else if ( e == '감시') eName = 'V_2';
+  else if ( e == '동맹하기') eName = 'ally';
+  else if ( e == '방송하기') eName = 'broadcast';
+  else if ( e == '알파검거') eName = 'arrest';
+  ClientSoc.emit('good', {
+    eventName : eName,
+    rName : Id('inRoom_rName').value,
+    color : Id('selectedColor').value,
+    role : Id('selectedRole').value,
+    prompt : Id('promptText').value
+  });
 }
-function myDEATH() {
-  Id('isAlive').value = 'false';
-  //스킬들 disabled
-  Id('Q확인').disabled = true;
+function skill_disabled() {
+  if ( Id('Q확인'))
+    Id('Q확인').disabled = true;
   Id('감시').disabled = true;
-  Id('동맹').disabled = true;
-  Id('방송').disabled = true;
-  if ( Id('검거') )
-    Id('검거').disabled = true;
-//대기리스트 등록 , 취소 disabled
-  Id('switching_apply').disabled = true;
-  Id('switching_cancel').disabled = true;
-  //생존자리스트에서 내색깔 제거
-  delColor(Id('myColor').value);
-  //관전자 채팅만할수있게 제한하기.
-  Id('toAll').disabled = true;
-  Id('toAll').checked = false;
-  Id('toAlly').disabled = true;
-  Id('toBy').checked = true;
-  Id('toBy').disabled = true;
-  whom('관전자');
-  //death-modal
-  deathmodal_Open();
-  //관전자방으로 이동
-  ClientSoc.emit('go_bystander', Id('inRoom_rName').value);
+  Id('동맹하기').disabled = true;
+  Id('방송하기').disabled = true;
+  if ( Id('알파검거') )
+    Id('알파검거').disabled = true;
+}
+var death_Q = false;
+ClientSoc.on('death_Q', ()=>{
+  death_Q = true;
+  briefing('', 'Q가 죽었습니다. Q의 모든 능력을 얻습니다.');
+  Id('help1').innerHTML = ""+ `<button class="Skillbutton" value = '1' id='알파검거'>알파검거</button></p>`;
+  if ( isSwitchingOn == true || Id('isAlive').value == 'false') {
+    Id('알파검거').disabled = true;
+    Id('방송하기').disabled = true;
+  }
+  else {
+    Id('방송하기').disabled = false;
+  }
+});
+//Q확인
+ClientSoc.on('V_1', (response)=>{
+  if ( response.answer == 'O')
+    briefing('', `확인결과, `+IMG(response.color)+` 는 Q입니다.`);
+  else
+    briefing('', `확인결과, `+IMG(response.color)+` 는 Q가 아닙니다.`)
+});
+//카오스감시
+ClientSoc.on('V_2', (response)=>{
+  briefing(response.color, '를 감시합니다.');
+});
+//알파검거
+ClientSoc.on('arrest', (response)=>{
+  if ( response.isArrest == 'O') {
+    briefing('', '알파를 검거했습니다. 당신의 승리입니다.');
+  }
+  else {
+    briefing(response.color, '는 알파가 아닙니다. 당신의 정체가 모두에게 알려집니다.');
+  }
+});
+function skill_abled() {
+
 }

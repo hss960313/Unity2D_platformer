@@ -14,6 +14,7 @@ ClientSoc.on('start_Response', (response)=>{
       Id('icon').setAttribute('style', `background-color : ${color};`);
       Id('switching_cancel').disabled = true;
       Id('game_colorName').innerHTML = IMG(color);
+      Id('game_colorName').setAttribute('style', `background-color : ${color}`);
       var oScript = document.createElement('script');
       oScript.type ='text/javascript';
       oScript.charset ='utf-8';
@@ -32,6 +33,7 @@ function fetch_charHTML(role, color) {
       response.text().then(function(text) {
         var sid = Id('my_socId').innerHTML;
         Id('body_ALL').innerHTML = text;
+        console.log(sid);
         Id('sid').value = sid;
         resolve(0);
       });
@@ -71,8 +73,9 @@ function selectedColor(color) {
 function RoleRadio() {
   var roleradio = '</p>';
   var roles= ['알파', '베타', '카오스', '큐', '브이', '이브', '루비' , '테토'];
+  var ROLES =['Alpha', 'Beta', 'Chaos', 'Q', 'V', 'EVE', 'Ruby', 'Tetto'];
   for (let k=0; k < 8; k++) {
-    roleradio += `<input type='radio' name='g3' onclick='selectedRole(this.value)' value='${roles[k]}'>${roles[k]}</p>`;
+    roleradio += `<input type='radio' name='g3' onclick='selectedRole(this.value)' value='${ROLES[k]}'>${roles[k]}</p>`;
   }
   return roleradio;
 }
@@ -88,17 +91,27 @@ function closeModal() {
   Id('modal_Back').style.display = 'none';
   Id('modal_gameOver').style.display = 'none';
 }
+function briefing(color, announce) {
+  var li = document.createElement('li');
+  if ( color != '')
+    li.innerHTML = `　!　`+IMG(color)+ "　" +announce;
+  else
+    li.innerHTML ="　!　"+announce;
+  Id('game_chatBox').appendChild(li);
 
+  fixBelow('game_chatBox');
+
+}
 function IMG(color) {
-  return `<img src="colorBox/${color}.jpg" />`;
+  return `<img src="colorBox/${color}.jpg" align='bottom'/>`;
 }
 function IMGS(list) {
   var imgs = '';
   for (let k=0; k < list.length; k++)
     if ( k == list.length-1)
-      imgs += `<img src="colorBox/${list[k]}.jpg"/>`;
+      imgs += `<img src="colorBox/${list[k]}.jpg" align='bottom'/>`;
     else
-     imgs += `<img src="colorBox/${list[k]}.jpg"/>　|　`;
+     imgs += `<img src="colorBox/${list[k]}.jpg" align='bottom'/>　|　`;
   return imgs;
 }
 
@@ -120,14 +133,16 @@ function classAttr(cn, attr, html) {
 }
 function nameSwitching_ChangeRequest(reason) {
   if (reason == 'ADD') {
-      Id('switching_apply').disabled = true;
-      Id('switching_cancel').disabled = false;
-      Id('switching_apply').innerText = '이미 대기등록 중입니다..';
+    skill_disabled();
+    Id('switching_apply').disabled = true;
+    Id('switching_cancel').disabled = false;
+    Id('switching_apply').innerText = '이미 대기등록 중입니다..';
   }
   else if ( reason =='Cancel') {
-      Id('switching_apply').disabled = false;
-      Id('switching_cancel').disabled = true;
-      Id('switching_apply').innerText = '등록하기';
+    skill_abled();
+    Id('switching_apply').disabled = false;
+    Id('switching_cancel').disabled = true;
+    Id('switching_apply').innerText = '등록하기';
 
   }
   ClientSoc.emit('nameSwitching_ChangeRequest', {
@@ -180,13 +195,14 @@ function ColorRole_Request(coolTime) {
   });
   */
   var eid = Id('selectedSkill').value;
+  reUseWaitList.push(eid);
   reUseWait(eid, coolTime);
 }
-
+var reUseWaitList = [];
 async function reUseWait(eid, coolTime) {
-  var reUseCount = Id(eid).value;
-  console.log("rw",reUseCount);
-  if ( reUseCount == 1) { // 마지막 한번남은경우
+  if ( Id(eid).value != 0)
+    Id(eid).value = Id(eid).value - 1;
+  if ( Id(eid).value == 0) {
       Id(eid).disabled = true;
   }
   else {
@@ -195,11 +211,15 @@ async function reUseWait(eid, coolTime) {
       var a = await skillCoolTime(eid, k);
     }
     Id(eid).innerText = eid;
-    Id(eid).disabled = false;
+    var sql = reUseWaitList.indexOf(eid);
+    if ( sql )
+      reUseWaitList.splice(spl,1);
+
+    if ( (isSwitchingOn == false) && ( Id('isAlive').value == 'true') )
+      Id(eid).disabled = false;
   }
-  if ( reUseCount != 0 && reUseCount != 1)
-    Id(eid).value -= 1;
 }
+
 function skillCoolTime(eid, value) {
   return new Promise((resolve, reject) => {
       Id(eid).innerText = '재사용('+value+")";
@@ -244,6 +264,90 @@ function skill_Prompt(coolTime, announce) {
   <button onclick="closeModal()" style="float: right; height : 45px;" >취소</button>`;
 
 }
+ClientSoc.on('ANNOUNCE', (response)=>{
+  let e = response.event;
+  let color = response.color;
+  if ( e == '심판') briefing(color, '님이 상태이상 #에 걸렸습니다.');
+  else if ( e == '파멸') briefing(color , '님이 상태이상 #에 걸렸습니다.');
+  else if ( e == '정체밝히기') briefing(color , '님이 상태이상 ☆에 걸렸습니다.');
+  else if ( e == '감시') briefing(color , '님이 상태이상 ☆에 걸렸습니다.');
+  else if ( e == 'arrest') {
+    briefing(color , '님이 상태이상 #에 걸렸습니다.');
+    if ( response.isArrest == 'O')
+      briefing('', '알파가 검거됐습니다.');
+    else
+      briefing(response.failColor, '가 알파를 검거하는데 실패했습니다. '+IMG(response.failColor)+"는 죽을 것입니다.");
+  }
+  else if ( e == '베타_검거') {
+    briefing(color , '님이 상태이상 #에 걸렸습니다.');
+    if ( response.isArrest == 'O')
+      briefing('', '루비가 베타를 검거했습니다.');
+    else
+      briefing('','루비가 베타를 검거하는데 실패했습니다. '+IMG(response.rubyColor)+"는 루비입니다.");
+  }
+  else if ( e == '카오스_검거') {
+    briefing(color , '님이 상태이상 #에 걸렸습니다.');
+    if ( response.isArrest == 'O')
+      briefing('' , '이브가 카오스를 검거했습니다.');
+    else
+      briefing('', '이브가 카오스를 검거하는데 실패했습니다. 이브는 '+IMG(response.eveColor)+"입니다.");
+  }
+  else if ( e == '심판의_조각') {
+    briefing(color , '님이 상태이상 #에 걸렸습니다.');
+    if ( response.answer == 'X')
+      briefing('', '이브가 심판에 실패했습니다. 이브는 '+IMG(response.eveColor)+"입니다.");
+  }
+  else if ( e == '진실의눈') briefing(color , '님이 상태이상 #에 걸렸습니다.');
+  else if ( e == 'Q확인') briefing(color , '님이 상태이상 ☆에 걸렸습니다.');
+  else if ( e == '이름훔치기') briefing(color , '님이 상태이상 ☆에 걸렸습니다.');
+  else if ( e == 'broadcast') broadcast(response.role, response.prompt)
+  else if ( e == '교란') confusingOn();
+  else if ( e == 'ally') briefing(color, '님과 동맹이 되었습니다.');
+
+});
+ClientSoc.on('ally', (response)=>{
+  brifefing(response.color, '님과 동맹이 되었습니다.');
+});
+function broadcast(role, prompt) {
+  var li = document.createElement('li');
+  li.innerHTML = `　　　　　${role}　:<p>${prompt}`;
+  Id('game_chatBox').appendChild(li);
+
+  fixBelow('game_chatBox');
+}
+function nothing() {
+}
+var isConfused = false;
+function confusingOn() {
+  isConfused = true;
+  setTimeout(()=>{
+    isConfused = false;
+  }, 1000*60);
+}
+
+function myDEATH() {
+  Id('isAlive').value = 'false';
+  flowCount = -9999;
+  //스킬들 disabled
+  skill_disabled();
+
+//대기리스트 등록 , 취소 disabled
+  Id('switching_apply').disabled = true;
+  Id('switching_cancel').disabled = true;
+  //생존자리스트에서 내색깔 제거
+  delColor(Id('myColor').value);
+  //관전자 채팅만하도록 제한
+  Id('toAll').disabled = true;
+  Id('toAll').checked = false;
+  Id('toAlly').disabled = true;
+  Id('toBy').checked = true;
+  whom('관전자');
+  //죽음창 팝업
+  deathmodal_Open();
+  //관전자방으로 이동
+  ClientSoc.emit('go_bystander', Id('inRoom_rName').value);
+}
+
 function PromptOn() {
   Id('submitPrompt').disabled = false;
 }
@@ -258,6 +362,7 @@ function Prompt_Request(coolTime) {
     promptText : Id('prompt').value
   });
   */
+  reUseWaitList.push(Id('selectedSkill').value);
   reUseWait(Id('selectedSkill').value, coolTime)
 }
 function skill_onlyColor(coolTime, announce) {
@@ -279,6 +384,7 @@ function onlyColor_Request(coolTime) {
     color : Id('selectedColor').value
   });
   */
+  reUseWaitList.push(Id('selectedSkill').value);
   reUseWait(Id('selectedSkill').value, coolTime);
 }
 function skill_onlyRole(coolTime, announce) {
@@ -299,6 +405,7 @@ function onlyRole_Request(coolTime) {
     role : Id('selectedRole').value
   });
   */
+  reUseWaitList.push(Id('selectedSkill').value);
   reUseWait(Id('selectedSkill').value, coolTime);
 }
 function nameSwitching_Initialize() {
@@ -373,10 +480,13 @@ ClientSoc.on('nameSwitchingOn_Request', (response)=> {
   Id('nameSwitching_right').style.display = 'none';
   switchingOn(response.list);
 });
+var isSwitchingOn = false;
 function switchingOn(list) {
   // 내가 이름을 내야 하는 경우(둘중에 하나가 나인경우)
   for (let k=0; k < list.length; k++) {
     if ( Id('myColor').value == list[k]) {
+
+      isSwitchingOn = true;
       Id('nameSwitching_left').innerHTML = '역할을 선택해 주세요.';
       switching_Role()
         .then((result)=> {
@@ -402,9 +512,11 @@ ClientSoc.on('before_initboard', (k)=> {
   Id('limit').innerText =""+ `${k}초 뒤 초기화됩니다.`;
 });
 ClientSoc.on('initboard', ()=> {
+  isSwitchingOn = false;
   Id('nameSwitching_left').innerHTML = nameSwitching_Initialize();
   Id('nameSwitching_right').style.display = 'block';
   if ( Id('isAlive').value == 'true' ) {
+    skill_abled();
     Id('switching_apply').disabled = false;
     Id('switching_apply').innerText = '등록하기';
     Id('switching_cancel').disabled = true;
@@ -432,9 +544,9 @@ ClientSoc.on('nameSwitching_finally', async function(list) {
   //1명이상 죽으면 수사권 획득.
 
 });
-var isgameover = false;
+var isgameOver = false;
 function deathmodal_Open() {
-  if ( isgameover == false) {
+  if ( isgameOver == false) {
     Id('modal_Death').style.display = 'block';
     Id('selectBackorHere').innerHTML = "당신은 죽었습니다. 당신은 관전자가 되어 다른 관전자들과 이 게임을 더 지켜보거나 채팅을 할수 있습니다. 지금부터의 당신의 채팅은 게임의 진행에 아무 영향을 주지 못합니다.<p> 화면 왼쪽 상단에 '로비로 이동' 버튼을 눌러 로비로 나갈수 있습니다.<p> (중요)게임 종료 전에 로비로 이동하는경우 게임에서 패배처리됩니다.<p><button style='float: right; height : 35px;' onclick='closeModal();'>창 닫기</button></p></p>";
     Id('selectBackorHere').style.width = '350px';
@@ -442,6 +554,57 @@ function deathmodal_Open() {
     Id('selectBackorHere').style.padding= '15px';
   }
 }
+
+
+function isWin(whowin, myRole) {
+  if (whowin == 'evil') {
+    if ( myRole == 'Alpha'|| myRole == 'Beta'|| myRole == 'Chaos')
+      return true;
+    else
+      return false;
+  }
+  else if ( whowin == 'good') {
+    if ( myRole == 'Alpha'|| myRole == 'Beta'|| myRole == 'Chaos')
+      return false;
+    else
+      return true;
+  }
+}
+var whowin;
+ClientSoc.on('gameOver', (response)=>{
+  whowin = response.whowin;
+  var colrole = response.colrole;
+  isgameOver = true;
+  skill_disabled();
+
+  Id('show_result').disabled = false;
+  Id('switching_apply').disabled = true;
+  Id('switching_cancel').disabled = true;
+  infoModal_Open(whowin, colrole);
+
+});
+function showResult() {
+  Id('modal_gameOver').style.display = 'block';
+}
+function infoModal_Open(whowin, colrole){
+  Id('modal_gameOver').style.display = 'block';
+  if ( whowin == 'good')
+    Id('Announce_gameOver').innerHTML = "게임이 종료되었습니다.<p> 알파의 검거/사망으로 탐정팀이 이겼습니다.<p>　";
+  else if ( whowin == 'evil')
+    Id('Announce_gameOver').innerHTML = "게임이 종료되었습니다.<p> 탐정측의 모든 캐릭터가 사망하였으므로 범인팀이 승리합니다.<p>　";
+/*
+  for ( key in colrole) {
+    Id('Announce_gameOver').innerHTML += IMG(key) + "의 정체는 "+colrole[key]+"입니다.<p>";
+  }
+  */
+  Id('Announce_gameOver').innerHTML += RoleRadio();
+  Id('Announce_gameOver').innerHTML += "<button onclick='closeModal();' style='float : right; height : 30px;'>창 닫기</button><button onclick='BACK_Request();' style='float : left; height : 30px;'>로비로 이동</button><p>";
+
+  Id('Announce_gameOver').style.width = '300px';
+  Id('Announce_gameOver').style.height = '450px';
+  Id('Announce_gameOver').style.padding= '20px';
+}
+
 async function after5sec() {
   Id('modal_Back').style.display = 'block';
   for (let k =5; k >= 0; k--) {

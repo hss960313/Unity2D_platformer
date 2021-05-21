@@ -47,4 +47,7 @@ inRoom.realTime = (socket, rName, io) => {
     list : io.sockets.adapter.rooms[rName]
   });
 }
+inRoom.ANNOUNCE = (io, rName, announce)=>{
+  io.in(rName).emit('ANNOUNCE_inRoom', announce);
+}
 module.exports = inRoom;

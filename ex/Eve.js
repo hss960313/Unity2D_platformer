@@ -5,15 +5,17 @@ ClientSoc.on('timeflow', (response) => {
     Id('timeflow').innerHTML = ""+ response.minutes + " : "+ response.second;
     flowCount++;
   }
-  //
+  if (flowCount >= 2100) {
+    BACK_Request();
+  }
 });
-var deathCount = 0;
+
 ClientSoc.on('DEATH', (death) =>{
-  if ( death.color == Id('myColor').value )
-    myDEATH();
-  else
-    delColor(death.color);
-  deathCount++;
+    if ( death.color == Id('myColor').value )
+      myDEATH();
+    else
+      delColor(death.color);
+
 });
 function skill_Request() {
   switch ( Id('selectedSkill').value ) {
@@ -24,60 +26,48 @@ function skill_Request() {
     case '심판의_조각':
       skill_ColorRole(0, '단 한번, 대상을 심판합니다.');
       break;
-    case '동맹':
+    case '동맹하기':
       skill_onlyColor(5, '대상과 동맹을 맺습니다');
   }
   //루비와 만나거나, 거교중 베타와 만날경우 자동동맹된다.
 }
 function skill_emit() {
-  switch ( Id('selectedSkill').value) {
-    case '카오스_검거':
-      ClientSoc.emit('EVE_1', {
-
-      });
-    break;
-    case '심판의_조각':
-      ClientSoc.emit('EVE_2', {
-
-      });
-    break;
-    case '동맹':
-      ClientSoc.emit('ally', {
-
-    });
-    break;
-    case '방송':
-      ClientSoc.emit('broadcast', {
-
-      });
-      break;
-    case '검거':
-      ClientSoc.emit('arrest', {
-
-    });
-    break;
-  }
+  let e =  Id('selectedSkill').value;
+  let eName;
+  if ( e == '카오스_검거') eName = 'EVE_1';
+  else if ( e == '심판의_조각') eName = 'EVE_2';
+  else if ( e == '동맹하기') eName = 'ally';
+  ClientSoc.emit('good', {
+    eventName : eName,
+    rName : Id('inRoom_rName').value,
+    color : Id('selectedColor').value,
+    role : Id('selectedRole').value
+  });
 }
-function myDEATH() {
-  Id('isAlive').value = 'false';
-  //스킬들 disabled
+//카오스 검거
+var hasSUSA = false;
+ClientSoc.on('EVE_1', (response)=>{
+  if ( response.isArrest == 'O') {
+    briefing('', '카오스를 검거하는데 성공했습니다. 심판의 조각을 얻습니다.');
+    hasSUSA = true;
+  }
+  else
+    briefing(response.color, `는 카오스가 아닙니다. 당신의 정체가 모두에게 알려집니다.`);
+});
+//심판의 조각
+ClientSoc.on('EVE_2', (response)=>{
+  if ( response.answer == 'O') {
+    briefing(response.color, `를 심판했습니다.`);
+  }
+  else {
+    briefing(response.color, `의 심판에 실패했습니다. 당신의 정체가 모두에게 알려집니다.`);
+  }
+});
+function skill_disabled() {
   Id('카오스_검거').disabled = true;
   Id('심판의_조각').disabled = true;
-  Id('동맹').disabled = true;
-//대기리스트 등록 , 취소 disabled
-  Id('switching_apply').disabled = true;
-  Id('switching_cancel').disabled = true;
-  //생존자리스트에서 내색깔 제거
-  delColor(Id('myColor').value);
-  //관전자 채팅만할수있게 제한하기.
-  Id('toAll').disabled = true;
-  Id('toAll').checked = false;
-  Id('toAlly').disabled = true;
-  Id('toBy').checked = true;
-  Id('toBy').disabled = true;
-  whom('관전자');
-  //death-modal
-  deathmodal_Open();
-  //관전자방으로 이동
-  ClientSoc.emit('go_bystander', Id('inRoom_rName').value);
+  Id('동맹하기').disabled = true;
+}
+function skill_abled() {
+
 }

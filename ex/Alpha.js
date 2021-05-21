@@ -5,10 +5,14 @@ ClientSoc.on('timeflow', (response) => {
     Id('timeflow').innerHTML = ""+ response.minutes + " : "+ response.second;
   }
   flowCount++;
+  if (flowCount >= 2100) {
+    BACK_Request();
+  }
   if (flowCount == 180) {
     hasSUSA = true;
   }
 });
+
 function skill_Request() {
   switch ( Id('selectedSkill').value ) {
     case '심판':
@@ -17,7 +21,7 @@ function skill_Request() {
     case '파멸':
       skill_ColorRole(0, '대상을 파멸시킬수 있습니다.');
       break;
-    case '동맹':
+    case '동맹하기':
       skill_onlyColor(3, '대상과 동맹을 맺습니다.');
       break;
     case '방송하기':
@@ -29,63 +33,59 @@ function skill_Request() {
 var deathCount = 0;
 var hasSUSA = false;
 ClientSoc.on('DEATH', (death) =>{
-  if ( death.color == Id('myColor').value )
-    myDEATH();
-  else
-    delColor(death.color);
+    if ( death.color == Id('myColor').value )
+      myDEATH();
+    else
+      delColor(death.color);
 
-  deathCount++;
+    briefing(death.color, death.announce);
+    deathCount++;
 
-  //Alpha는 게임에서 한명이상 제외되었을 때 수사권을 얻음.
-  if ( deathCount == 1) {
-    hasSUSA = true;
-  }
+    //Alpha는 게임에서 한명이상 제외되었을 때 수사권을 얻음.
+    if ( deathCount == 1) {
+      hasSUSA = true;
+    }
 });
 function skill_emit() {
-  switch ( Id('selectedSkill').value) {
-    case '심판':
-      ClientSoc.emit('Alpha_1', {
-
-      });
-    break;
-    case '파멸':
-      ClientSoc.emit('Alpha_2', {
-
-      });
-    break;
-    case '동맹':
-      ClientSoc.emit('ally', {
-
-    });
-    break;
-    case '방송하기':
-      ClientSoc.emit('broadcast', {
-
-      });
-      break;
-  }
+  let e =  Id('selectedSkill').value;
+  let eName;
+  if ( e == '심판') eName = 'Alpha_1';
+  else if ( e == '파멸') eName = 'Alpha_2';
+  else if ( e == '동맹하기') eName = 'ally';
+  else if ( e == '방송하기') eName = 'broadcast';
+  ClientSoc.emit('evil', {
+    eventName : eName,
+    rName : Id('inRoom_rName').value,
+    color : Id('selectedColor').value,
+    role : Id('selectedRole').value,
+    prompt : Id('promptText').value
+  });
 }
-function myDEATH() {
-  Id('isAlive').value = 'false';
-  //스킬들 disabled
+
+
+ClientSoc.on('Alpha_1', (response)=>{
+  let ans = response.answer;
+  if ( ans == 'O') briefing('', `당신은 `+IMG(response.color)+` : ${response.role}를 심판하는데에 성공했습니다. `);
+  else if ( ans == 'X') briefing('', `심판에 실패했습니다. `)
+  else if ( ans == 'BAN') briefing('', `심판에 실패했습니다. 당신은 더이상 ${response.role}을 심판할 수 없습니다.`);
+  else if ( ans == 'BANNED') briefing('', `더이상 심판할 수 없는 인물입니다.`);
+  else if ( ans == 'death') briefing('', '당신은 4번이상 심판에 실패했습니다. 당신의 패배입니다.');
+  else if ( ans == 'V') briefing('', 'Q가 죽기 전에는 V에 대해 심판할 수 없습니다.');
+});
+
+ClientSoc.on('Alpha_2', (response)=> {
+  let ans = response.answer;
+  if ( ans == 'O') briefing('', `당신은 `+IMG(response.color)+` : ${response.role}를 파멸시키는 데에 성공했습니다. `);
+  else if ( ans == 'X') briefing('', `당신은 `+IMG(response.color)+`를 파멸시키는데에 실패했습니다. `);
+  else if ( ans == 'V') briefing('', `Q가 죽기 전에는 V를 파멸시킬수 없습니다.`);
+});
+
+function skill_disabled() {
   Id('심판').disabled = true;
   Id('파멸').disabled = true;
-  Id('동맹').disabled = true;
-  Id('방송').disabled = true;
-//대기리스트 등록 , 취소 disabled
-  Id('switching_apply').disabled = true;
-  Id('switching_cancel').disabled = true;
-  //생존자리스트에서 내색깔 제거
-  delColor(Id('myColor').value);
-  //관전자 채팅만하도록 제한
-  Id('toAll').disabled = true;
-  Id('toAll').checked = false;
-  Id('toAlly').disabled = true;
-  Id('toBy').checked = true;
-  Id('toBy').disabled = true;
-  whom('관전자');
-  //죽음창 팝업
-  deathmodal_Open();
-  //관전자방으로 이동
-  ClientSoc.emit('go_bystander', Id('inRoom_rName').value);
+  Id('동맹하기').disabled = true;
+  Id('방송하기').disabled = true;
+}
+function skill_abled() {
+
 }

@@ -1,3 +1,10 @@
+img {
+  width : 21px;
+  height : 21px;
+}
+li {
+  margin-top : 7px;
+}
 #switching_apply {
   float : right;
   height : 35px;
@@ -119,9 +126,10 @@
   overflow-y : scroll;
   padding-top : 10px;
   padding-left : 15px;
-  font-size : 20px;
+  font-size : 21px;
   background-color : black;
   color : white;
+  letter-spacing : 1px;
 }
 #radioBox {
   position : absolute;
@@ -142,10 +150,9 @@
 }
 #game_colorName {
   position : absolute;
-  width : 35px;
-  height : 35px;
-  font-size : 20px;
-
+  display : inline-block;
+  width : 30px;
+  height : 30px;
 }
 #game_colon {
   position : absolute;

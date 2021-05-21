@@ -15,7 +15,7 @@
     <div id="BacklobbyAfter5sec" class='modal-content'></div>
   </div>
   <div id="modal_gameOver" class="modal">
-    <div id="Announce_gameOver" calss="modal-content"></div>
+    <div id="Announce_gameOver" class="modal-content"></div>
   </div>
   <button id="BacklobbyAfter" onclick='after5sec();'>로비로 이동</button>
   <div class="help" id="help0">
@@ -31,15 +31,16 @@
    </div>
 
   <div id="skills" >
-    <input type="hidden" id="selectedSkill">
-    <input type="hidden" id="selectedColor">
-    <input type="hidden" id="selectedRole">
+    <input type="hidden" id="selectedSkill" value=''>
+    <input type="hidden" id="selectedColor" value=''>
+    <input type="hidden" id="selectedRole" value=''>
+    <input type="hidden" id="promptText" value=''>
 
     <div class="help"id="help1">
     <button class="Skillbutton" value = '1' id='진실의눈' disabled>진실의눈</button></p>
     </div>
     <div class="help" id="help2">
-    <button class="Skillbutton" value='0' id='동맹' >동맹하기</button></p>
+    <button class="Skillbutton" value='-1' id='동맹하기' >동맹하기</button></p>
     </div>
     <div class="help" id="help3">
     <button class="Skillbutton" value='1' id='사칭' >방송하기</button></p>
@@ -62,6 +63,7 @@
 </div>
   <div id="nameSwitching">
   <div id="nameSwitching_left">이름교환 대기리스트 : </div>
+  <div id='nameSwitching_middle'></div>
   <div id="nameSwitching_right">
       <button id="switching_apply" value='ADD' onclick="nameSwitching_ChangeRequest(this.value)">
         등록하기</button>
