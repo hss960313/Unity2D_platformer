@@ -2,8 +2,6 @@ function evil(DB, serverDB, io) {
   this.DB = DB;
   this.server = serverDB;
   this.io = io;
-  this.Alpha_failcount = { 'Alpha' : 0, 'Beta' : 0, 'Chaos' : 0,
-    'Q' : 0, 'V' : 0, 'Eve' : 0, 'Ruby' : 0, 'Tetto': 0};
 }
 
 var proto = evil.prototype;
@@ -14,27 +12,31 @@ proto.skill = async function(socket, io, request, gameList) {
   let colsoc = gameList[rName].colsoc;
   let rolesoc = gameList[rName].rolesoc;
   let colrole = gameList[rName].colrole;
-  let isalive = gameList[rName].isAlive;
   let sockets = gameList[rName].sockets;
   let color = request.color;
   let role = request.role;
-  if (      e == 'Alpha_1') Alpha_1(socket, io, rName, gameList, color, role, (this.Alpha_failcount));  //심판
+  let failcounts = gameList[rName].failCounts;
+  if (      e == 'Alpha_1') Alpha_1(socket, io, rName, gameList, color, role, failcounts);  //심판
   else if ( e == 'Alpha_2') Alpha_2(socket, io, rName, gameList, color, role); //파멸
   else if ( e == 'Beta_1') Beta_1(socket, io, rName, colsoc, colrole, color); //진실의눈
   else if ( e == 'Beta_2') Beta_2(socket, io, rName); //교란
   else if ( e == 'Beta_3') Beta_3(socket, io, rName, sockets, rolesoc, request.prompt); //사칭
-  else if ( e == 'Chaos_1') Chaos_1(socket, io, rNmae, colsoc, rolesoc, color, role); // 정체밝히기
+  else if ( e == 'Chaos_1') Chaos_1(socket, io, rName, colrole, color, role); // 정체밝히기
   else if ( e == 'Chaos_2') Chaos_2(socket, io, rName, request.prompt) //카오스_방송
   else if ( e == 'ally') ally(socket, io, rName, sockets, colsoc, color); //동맹
   else if ( e == 'broadcast') broadcast_Q(socket, io, rName, request.prompt);  //방송
 }
 
 //심판
-function Alpha_1(socket, io, rName, gameList, color, role, failcount) {
+async function Alpha_1(socket, io, rName, gameList, color, role, failcount) {
   io.in(rName).emit('ANNOUNCE', {
     event : '심판',
     color : color
   });
+  var a = await sleep(100);
+  for ( var key in failcount) {
+    console.log("failcount["+key+']= ',failcount[key]);
+  }
   let ans;
   let colsoc = gameList[rName].colsoc;
   let rolesoc  = gameList[rName].rolesoc;
@@ -51,54 +53,50 @@ function Alpha_1(socket, io, rName, gameList, color, role, failcount) {
       ans = 'O';
     else {
       ans = 'X';
-      failcount[role] += 1;
+      failcount[role] = failcount[role]+1;
       if ( failcount[role] >= 2)
         ans = 'BAN';
-      var sum =0;
-      for ( let i=0; i < failcount.length; i++)
-        sum += failcount[i];
-      if ( sum >= 4)
-        ans = 'death';
-      }
     }
+  }
   else if ( failcount[role] >= 2) {
-        ans = 'BANNED';
-      }
+    ans = 'BANNED';
+    failcount[role] = failcount[role]+1;
+    var sum =0;
+    for ( let i=0; i < failcount.length; i++)
+      sum += failcount[i];
+    console.log(sum);
+    if ( sum >= 4)
+      ans = 'death';
+  }
 
   socket.emit('Alpha_1', {
     answer : ans,
     color : color,
     role : role
   });
-  if ( ans = 'O')
+  if ( ans == 'O')
     death(io, rName, gameList, color);
-  else if ( ans = 'death')
+  else if ( ans == 'death')
     death(io, rName, gameList, mycolor(socket, colsoc));
 }
 //파멸
-function Alpha_2(socket, io, rName, gameList, color, role) {
+async function Alpha_2(socket, io, rName, gameList, color, role) {
   io.in(rName).emit('ANNOUNCE', {
     event : '파멸',
     color : color
   });
-
+  let a = await sleep(200);
   let ans = '';
   let isalive = gameList[rName].isAlive;
   let colsoc = gameList[rName].colsoc;
   let rolesoc = gameList[rName].rolesoc;
-  if ( role == 'V') {
-    if ( isalive['Q'] == true ) {
-      ans = 'V';
-    }
-    else ans = 'Qdeath';
-  }
-  if ( ans == '' || ans == 'Qdeath') {
+
     if ( colsoc[color] == rolesoc[role])
       ans = 'O'
     else
       ans = 'X';
-  }
-    if (ans = 'O')
+
+    if (ans == 'O')
       death(io, rName, gameList, color);
     socket.emit('Alpha_2', {
       answer : ans,
@@ -143,24 +141,33 @@ function Beta_3(socket, io, rName, sockets, rolesoc, prompt) {
   }
 }
 //정체밝히기
-function Chaos_1(socket, io, rName, colsoc, colrole, color, role) {
+function Chaos_1(socket, io, rName, colrole, color, role) {
   io.in(rName).emit('ANNOUNCE', {
     event : '정체밝히기',
     color : color
   });
-
-  var real_role = colrole[color];
   let ans;
+  var real_role = colrole[color];
+
   if ( real_role == role ) {
     ans = 'O';
   }
   else
     ans = 'X';
 
-  socket.emit('Chaos', {
+  socket.emit('Chaos_1', {
     answer : ans,
     color : color,
     role : role
+  });
+}
+
+//카오스_방송
+function Chaos_2(socket, io, rName, prompt) {
+  io.in(rName).emit('ANNOUNCE', {
+    event : 'broadcast',
+    prompt : prompt,
+    role : 'Chaos'
   });
 }
 //동맹
@@ -182,14 +189,6 @@ function ally(socket, io, rName, sockets, colsoc, color) {
   socket.emit('ANNOUNCE', {
     event : 'ally',
     color : color
-  });
-}
-//카오스_방송
-function Chaos_2(socket, io, rName, prompt) {
-  io.in(rName).emit('ANNOUNCE', {
-    event : 'broadcast',
-    prompt : prompt,
-    role : 'Chaos'
   });
 }
 //방송하기
@@ -222,11 +221,12 @@ function find_role(colsoc, rolesoc, color) {
   return key;
 }
 //
-function death(io, roomName, gameList, color) {
+async function death(io, roomName, gameList, color) {
   var isalive = gameList[roomName].isAlive;
   var rolesoc = gameList[roomName].rolesoc;
   var colsoc = gameList[roomName].colsoc;
   var sockets = gameList[roomName].sockets;
+  var a = await sleep(1000);
   for (var key in rolesoc)
     if ( rolesoc[key] == colsoc[color]) break;
   isalive[key] = false;
@@ -240,13 +240,17 @@ function death(io, roomName, gameList, color) {
       }
       sockets[j].emit('death_Q', '');
     }
+    if ( (key == 'V') && (isalive['Q'] == false) ) {
+      gameList[roomName].victoryCount +=10;
+
+    }
   }
   if ( (key =='Alpha') || (gameList[roomName].victoryCount >= 5 )) {
     clearInterval(gameList[roomName].timeflow);
-    var whowin;
+    var whowin = '';
     if ( key == 'Alpha')
       whowin = 'good';
-    else if (gameList[roomName].victoryCount == 5)
+    else if (gameList[roomName].victoryCount >= 5)
       whowin = 'evil';
 
     io.in(roomName).emit('gameOver', {
@@ -255,10 +259,14 @@ function death(io, roomName, gameList, color) {
     });
   }
 
+  console.log(" ");
+  console.log("ev");
   io.in(roomName).emit('DEATH', {
     color : color,
     announce : `님이 사망하셨습니다.`
   });
+  console.log("il");
+  console.log(" ");
 
 } // end of death
 

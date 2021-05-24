@@ -8,8 +8,10 @@
     return document.getElementById(id);
   }
   function fixBelow(chatbox) {
-    var objDiv = Id(chatbox);
-    objDiv.scrollTop = objDiv.scrollHeight;
+    if ( Id(chatbox) ) {
+      var objDiv = Id(chatbox);
+      objDiv.scrollTop = objDiv.scrollHeight;
+    }
   }
   </script>
   <script src="ex/lobby.js"></script>

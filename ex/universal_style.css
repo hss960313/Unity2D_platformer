@@ -34,6 +34,7 @@ li {
   border : 1px solid black;
   display : none;
   opacity : 0.9;
+  padding : 5px;
 }
 
 #icon {
@@ -88,6 +89,14 @@ li {
   height : 90px;
   float : left;
   padding : 5px;
+}
+#nameSwitching_middle {
+  position : absolute;
+  left : 420px;
+  width : 100px;
+  height : 90px;
+  padding-top : 5px;
+  color : red;
 }
 #nameSwitching_right {
   position : absolute;

@@ -44,20 +44,8 @@ ClientSoc.on('ANNOUNCE_inRoom', function(data) {
   }
 });
 function BACK_Request() {
-  if (Id('game_chatBox')) { //게임시작 후 room에 나갔을때
-    var isyouwin = '';
-    console.log("isgameOver= ", isgameOver);
-    if ( isgameOver == true)
-      isyouwin = isWin(whowin, Id('myRole').value);
-    ClientSoc.emit('BACK_gameOver', {
-      rName : Id('inRoom_rName').value,
-      isgameOver : isgameOver,
-      isWin : isyouwin
-    });
-    initBODY_ALL(Id('inRoom_rName').value, Id('sid').value);
-  }
-  else //게임시작 전에 room에서 나갔을때
-    ClientSoc.emit('BACK_beforeGame', Id('where').innerHTML)
+   //게임시작 전에 room에서 나갔을때
+    ClientSoc.emit('BACK_beforeGame', Id('where').innerHTML);
 }
 function initBODY_ALL(rName, sid) {
   Id('body_ALL').innerHTML = ""+`<header id="HEADER">
@@ -83,6 +71,7 @@ function BACK_OK(sid) {
       realTime_inRoom_STOP();
       ClientSoc.emit("BACK_COMPLETED", Id('where').innerHTML);
       Id('where').innerHTML = 'lobby';
+      Id('my_socId').innerHTML = '나 : '+sid;
       Id('lobby_sid').value = sid;
       realTime_lobby_Request();
     });

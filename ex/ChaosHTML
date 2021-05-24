@@ -38,7 +38,7 @@
     <button class="Skillbutton" value = '12' id='정체밝히기' >정체밝히기</button></p>
     </div>
     <div class="help" id="help2">
-    <button class="Skillbutton" value='-1' id='방송' >방송하기</button></p>
+    <button class="Skillbutton" value='-1' id='방송하기' >방송하기</button></p>
     </div>
     </div>
 

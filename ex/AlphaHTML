@@ -42,10 +42,7 @@
     <button class="Skillbutton" value = '1' id='파멸' disabled>파멸 사용</button></p>
     </div>
     <div class="help" id="help3">
-    <button class="Skillbutton" value='-1' id='동맹하기' >동맹하기</button></p>
-    </div>
-    <div class="help" id="help4">
-    <button class="Skillbutton" value='-1' id='방송하기'>방송하기</button></p>
+    <button class="Skillbutton" value='-1' id='동맹하기' disabled>동맹하기</button></p>
     </div>
     </div>
 
@@ -92,9 +89,5 @@
   <button id="detail" onclick="contentView();" >내 역할 자세히 보기</button>
     <div id="detailContent"></div>
   </div>
-  <div id="helpDiv"></p>색깔 하나와 이름 하나를 골라 그 색깔의 참가자의 정체가 그 이름이라면 게임에서 제외한다.
-  (재사용 대기시간 60초)<p>
-4번 실패하는 경우 게임에서 패배한다.</p>
-Q가 죽기전에는 상대가 V인경우에는 죽일 수 없다.</p>
-같은 이름을 두 번 실패하면 그 이름은 심판할 수 없다.</p>
+  <div id="helpDiv">
 </div>

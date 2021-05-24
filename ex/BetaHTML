@@ -40,12 +40,9 @@
     <button class="Skillbutton" value = '1' id='진실의눈' disabled>진실의눈</button></p>
     </div>
     <div class="help" id="help2">
-    <button class="Skillbutton" value='-1' id='동맹하기' >동맹하기</button></p>
+    <button class="Skillbutton" value='1' id='사칭' >사칭 방송</button></p>
     </div>
     <div class="help" id="help3">
-    <button class="Skillbutton" value='1' id='사칭' >방송하기</button></p>
-    </div>
-    <div class="help" id="help4">
     <button class="Skillbutton" value = '2' id='교란' >수사권 교란</button></p>
     </div>
     </div>

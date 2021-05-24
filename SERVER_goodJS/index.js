@@ -12,26 +12,28 @@ proto.skill = async function(socket, io, request, gameList) {
   var rName = request.rName;
   var colsoc = gameList[rName].colsoc;
   var rolesoc = gameList[rName].rolesoc;
+  var colrole = gameList[rName].colrole;
   var color = request.color;
   var role = request.role;
   var sockets = gameList[rName].sockets;
-  var tettoE = gameList[rName].tettoE;
+  var tettoE = gameList[rName].events.tettoE;
   if      ( e == 'V_1') V_1(socket, io, rName, colrole, color); //Q확인
   else if ( e == 'V_2') V_2(socket, io, rName, sockets, colsoc, color); //카오스 감시
   else if ( e == 'EVE_1') EVE_1(socket, io, rName, gameList, color); //카오스 검거
   else if ( e == 'EVE_2') EVE_2(socket, io, rName, color, gameList, role); // 심판의 조각
   else if ( e == 'Ruby') Ruby(socket, io, rName, gameList, color); // 베타 검거
-  else if ( e == 'Tetto') Tetto(socket, io, rName, colsoc, tettoE); //이름훔치기
+  else if ( e == 'Tetto') Tetto(socket, io, rName, colrole, color, tettoE); //이름훔치기
   else if ( e == 'ally') ally(socket, io, rName, sockets, colsoc, color); //동맹
   else if ( e == 'arrest') arrest(socket, io, rName, gameList, color); // 알파검거
   else if ( e == 'broadcast') broadcast_Q(socket, io, rName, request.prompt); //방송
 }
 //Q확인
-function V_1(socket, io, rName, colrole, color) {
+async function V_1(socket, io, rName, colrole, color) {
   io.in(rName).emit('ANNOUNCE', {
     event : 'Q확인',
     color : color
   });
+  var a = await sleep(100);
   if ( colrole[color] =='Q')
     ans = 'O';
   else
@@ -43,16 +45,17 @@ function V_1(socket, io, rName, colrole, color) {
   });
 }
 //감시
-function V_2(socket, io, rName, sockets, colsoc, color) {
+async function V_2(socket, io, rName, sockets, colsoc, color) {
   io.in(rName).emit('ANNOUNCE', {
     event : '감시',
     color : color
   });
+  var a = await sleep(100);
   var sid = colsoc[color];
   for ( var k=0; k < sockets.length; k++)
     if ( sid == sockets[k].id) break;
 
-  sockets[k].emit('감시', '');
+  sockets[k].emit('observe', '');
 
   socket.emit('V_2', {
     color : color
@@ -60,21 +63,15 @@ function V_2(socket, io, rName, sockets, colsoc, color) {
 
 };
 //카오스 검거
-function EVE_1(socket, io, rName, gameList, color) {
+async function EVE_1(socket, io, rName, gameList, color) {
   var colrole = gameList[rName].colrole;
+  var colsoc = gameList[rName].colsoc;
   var isArrest;
-  if ( colrole[color] == 'Chaos') {
+  if ( colrole[color] == 'Chaos')
     isArrest = 'O';
-    death(io, rName, color, gameList);
-  }
-  else {
+  else
     isArrest = 'X';
-  }
 
-  socket.emit('EVE_1', {
-    isArrest : isArrest,
-    color : color
-  });
   var eveColor = '';
   if ( isArrest == 'X')
     eveColor = mycolor(socket, colsoc);
@@ -84,23 +81,26 @@ function EVE_1(socket, io, rName, gameList, color) {
     color : color,
     eveColor : eveColor
   });
+  var a = await sleep(100);
+  socket.emit('EVE_1', {
+    isArrest : isArrest,
+    color : color
+  });
+  if ( isArrest == 'O')
+    death(io, rName, color, gameList);
 };
 //심판의 조각
-function EVE_2(socket, io, rName, color, gameList, role) {
+async function EVE_2(socket, io, rName, color, gameList, role) {
   var colsoc = gameList[rName].colsoc;
   var colrole = gameList[rName].colrole;
   var ans;
   if ( colrole[color] == role) {
     ans = 'O';
-    death(io, rName, color, gameList);
   }
   else {
     ans = 'X';
   }
-  socket.emit('EVE_2', {
-    answer : ans,
-    color : color
-  });
+
   var eveColor = '';
   if ( ans == 'X')
     eveColor = mycolor(socket, colsoc);
@@ -110,21 +110,27 @@ function EVE_2(socket, io, rName, color, gameList, role) {
     color : color,
     eveColor : eveColor
   });
-};
-//베타_검거
-function Ruby(socket, io, rName, gameList, color) {
-  var isArrest;
-  if ( colrole[color] == 'Beta') {
-    isArrest = 'O';
-    death(io, rName, color, gameList);
-  }
-  else {
-    isArrest = 'X';
-  }
-  socket.emit('Ruby', {
-    isArrest : isArrest,
+  var a = await sleep(100);
+  socket.emit('EVE_2', {
+    answer : ans,
     color : color
   });
+  if ( ans == 'O')
+    death(io, rName, color, gameList);
+  else if ( ans == 'X')
+    death(io, rName, eveColor, gameList);
+};
+//베타_검거
+async function Ruby(socket, io, rName, gameList, color) {
+
+  var isArrest = '';
+  var colrole = gameList[rName].colrole;
+  var colsoc = gameList[rName].colsoc;
+  if ( colrole[color] == 'Beta')
+    isArrest = 'O'
+  else
+    isArrest = 'X';
+
   var rubyColor = '';
   if ( isArrest == 'X')
     rubyColor = mycolor(socket, colsoc);
@@ -134,14 +140,21 @@ function Ruby(socket, io, rName, gameList, color) {
     color : color,
     rubyColor : rubyColor
   });
-
+  var a = await sleep(100);
+  socket.emit('Ruby', {
+    isArrest : isArrest,
+    color : color
+  });
+  if ( isArrest == 'O') death(io, rName, color, gameList);
 };
+
 //이름훔치기
-function Tetto(socket, io, rName, colrole, color, tettoE) {
+async function Tetto(socket, io, rName, colrole, color, tettoE) {
   io.in(rName).emit('ANNOUNCE', {
     event : '이름훔치기',
     color : color
   });
+  var a = await sleep(100);
   var steal = colrole[color];
   if ( (steal == 'Q') || (steal = 'V') || (steal == 'Alpha')) {
     steal = tettoE[steal];
@@ -173,22 +186,17 @@ function ally(socket, io, rName, sockets, colsoc, color) {
     color : mycolor(socket, colsoc)
   });
 }
+
 //알파검거
-async function arrest(socket, io, rName, colrole, color) {
-  var isArrest;
-  if ( colrole[color] == 'Alpha') {
+async function arrest(socket, io, rName, gameList, color) {
+  var colrole = gameList[rName].colrole;
+  var colsoc = gameList[rName].colsoc;
+  var isArrest = '';
+  if ( colrole[color] == 'Alpha')
     isArrest = 'O';
-    death(io, rName, color, gameList);
-  }
-  else {
+  else
     isArrest = 'X';
-    var a = await sleep(3000);
-    death(io, rName, mycolor(socket, colsoc), gameList);
-  }
-  socket.emit('arrest', {
-    isArrest : isArrest,
-    color : color
-  });
+
   var failColor = '';
   if ( isArrest == 'X')
     failColor = mycolor(socket, colsoc);
@@ -198,6 +206,15 @@ async function arrest(socket, io, rName, colrole, color) {
     color : color,
     failColor : failColor
   });
+  var a = await sleep(100);
+
+  socket.emit('arrest', {
+    isArrest : isArrest,
+    color : color
+  });
+
+  if ( isArrest == 'O') death(io, rName, color, gameList);
+  else if ( isArrest == 'X') death(io, rName, failColor, gameList);
 }
 
 function broadcast_Q(socket, io, rName, prompt) {
@@ -215,42 +232,51 @@ function mycolor(socket, colsoc) {
   return key;
 }
 
-function death(io, roomName, color, gameList) {
+async function death(io, roomName, color, gameList) {
   var isalive = gameList[roomName].isAlive;
   var rolesoc = gameList[roomName].rolesoc;
   var colsoc = gameList[roomName].colsoc;
   var sockets = gameList[roomName].sockets;
+  var a = await sleep(2000);
   for (var key in rolesoc)
     if ( rolesoc[key] == colsoc[color]) break;
-  isalive[key] = false;
+  if ( isalive[key] == true) {
+    isalive[key] = false;
+    if ( (key== 'Q') || (key == 'V') || (key == 'EVE') || (key == 'Ruby') || (key == 'Tetto') ) {
+      gameList[roomName].victoryCount += 1;
 
-  if ( (key== 'Q') || (key == 'V') || (key == 'EVE') || (key == 'Ruby') || (key == 'Tetto') ) {
-    gameList[roomName].victoryCount += 1;
+      if ( (key == 'V') && (isalive['Q'] == false) ) {
+        gameList[roomName].victoryCount +=10;
+      }
+    }
+    if ( (key =='Alpha') || (gameList[roomName].victoryCount >= 5 )) {
+      clearInterval(gameList[roomName].timeflow);
+      var whowin;
+      if ( key == 'Alpha')
+        whowin = 'good';
+      else if (gameList[roomName].victoryCount >= 5)
+        whowin = 'evil';
+
+      io.in(roomName).emit('gameOver', {
+        whowin : whowin,
+        colrole : gameList[roomName].colrole
+      });
+    }
+    console.log(" ");
+    console.log("go");
+    io.in(roomName).emit('DEATH', {
+      color : color,
+      announce : `님이 사망하셨습니다.`
+    });
+    console.log("od");
+    console.log(" ");
+    var a = await sleep(100);
     if ( key == 'Q') {
       for ( var j in sockets) {
         if ( rolesoc['V'] == sockets[j].id) break;
       }
       sockets[j].emit('death_Q', '');
     }
-  }
-  if ( (key =='Alpha') || (gameList[roomName].victoryCount >= 5 )) {
-    clearInterval(gameList[roomName].timeflow);
-    var whowin;
-    if ( key == 'Alpha')
-      whowin = 'good';
-    else if (gameList[roomName].victoryCount >= 5)
-      whowin = 'evil';
-
-    io.in(roomName).emit('gameOver', {
-      whowin : whowin,
-      colrole : gameList[roomName].colrole
-    });
-  }
-  else {
-    io.in(roomName).emit('DEATH', {
-      color : color,
-      announce : `님이 사망하셨습니다.`
-    });
   }
 } // end of func:death
 function sleep(t) {

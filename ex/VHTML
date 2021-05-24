@@ -43,7 +43,7 @@
     <button class="Skillbutton" value='-1' id='동맹하기' >동맹하기</button></p>
     </div>
     <div class="help" id="help4">
-    <button class="Skillbutton" id='방송하기' value = '-1' disabled>방송하기</button></p>
+    <button class="Skillbutton" value = '-1' id='방송하기' disabled>방송하기</button></p>
     </div>
   </div>
 
