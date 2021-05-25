@@ -17,9 +17,9 @@ const joinProcess = require('./SERVER_joinProcessJS');
 const TIME = require('./SERVER_TimeJS');
 
 const UNIVERSAL = require('./SERVER_universalJS');
-const serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
+//const serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
 
-//const serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sktkffleh!@3', 'node960313');
+const serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sktkffleh!@3', 'node960313');
 const GOOD = require('./SERVER_goodJS');
 const EVIL = require('./SERVER_evilJS');
 DB.connect(serverDB)
