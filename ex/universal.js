@@ -73,7 +73,7 @@ function contentView() {
   role = Id('myRole').value;
   isView = !isView;
   if ( isView == true) {
-    fetch('ex/'+role+'DETAIL').then(function(response) {
+    fetch('ex/'+role+'detail').then(function(response) {
       response.text().then(function(text) {
         Id('detailContent').innerHTML = text;
       })
