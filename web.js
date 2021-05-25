@@ -280,36 +280,8 @@ socket.on('disconnect', async function() {
   }
 });
 socket.on('BACK_gameOver', (response)=> {
-  var rName = response.rName;
-  var isOver = response.isgameOver;
-  var iswin = response.isWin;
-  var color = response.color;
-  outUsersIn[rName] = outUsersIn[rName] + 1;
-  if (outUsersIn[rName] == countUsersIn[rName]) {
-    deleteRname(rName);
-  }
-  else {
-    if ( isOver == false) {
-      //DB에 패배저장
-      //
-      var isalive = gameList[rName].isAlive;
-      var colrole = gameList[rName].colrole;
-
-        //살아있는경우 게임에서 제외함.
-      if ( isalive[colrole[color]] == true)
-        universal.death(io, rName, color, gameList);
-    }
-    else {
-      //DB에 iswin 저장
-      //
-      sleep(100);
-    }
-    universal.ANNOUNCE(io, rName, color, '님이 게임에서 떠났습니다.');
-  }
   inRoom.redirect(socket, '/game');
 });
-    //
-    //
 }); // end of io.on
 //
 //
