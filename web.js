@@ -70,190 +70,194 @@ io.on('connection', function(socket) {
     universal.server(io, socket, request, gameList);
   });
   */
-  socket.on('good', (request)=>{
-    good.skill(socket, io, request, gameList);
+socket.on('good', (request)=>{
+  good.skill(socket, io, request, gameList);
+});
+
+socket.on('evil', (request)=>{
+  evil.skill(socket, io, request, gameList);
+});
+
+socket.on('login_Request', () =>  {
+  lobby.Login(socket);
+  userCount++;
+  DB.insert_newSoc(serverDB, `${socket.id}`);
+  allsoc['lobby'].push(socket);
+});
+
+socket.on('lobbyChat_Request', function(msg) {
+  lobby.Chat(socket, msg);
+});
+
+socket.on('realTime_lobby_Request', () => {
+  lobby.realTime(socket);
+});
+socket.on('BACK_beforeGame', (roomName) => {
+  inRoom.BACK(socket, roomName);
+});
+
+socket.on('BACK_COMPLETED', function(roomName) {
+  inRoom.BACK_COMPLETED(socket, roomName);
+  DB.update_Location(serverDB, 'lobby', socket.id);
+  tLfR(socket.id, roomName);
+  var rooms = io.sockets.adapter.rooms;
+
+});
+
+socket.on('roomChat_Request', function(data) {
+  inRoom.Chat(socket, data);
+});
+
+socket.on('realTime_inRoom_Request', (rName) => {
+  inRoom.realTime(socket, rName, io);
+});
+
+socket.on('joinProcessHTML_Request', ()=> {
+  joinProcess.HTML(socket);
+});
+
+socket.on('JOIN_Request', (roomName) => {
+  joinProcess.JOIN(socket, roomName, io, gameList);
+});
+
+socket.on('JOIN_COMPLETED', (roomName) => {
+  joinProcess.JOIN_COMPLETED(socket, roomName);
+  DB.update_Location(serverDB, roomName, socket.id);
+  tRfL(socket.id, roomName);
+});
+socket.on('realTime_roomList_Request', ()=> {
+  joinProcess.realTime(socket, io);
+});
+
+socket.on('createRoom_Request', function(roomName) {
+  var rooms = io.sockets.adapter.rooms;
+  var ans;
+  var rName = roomName.replace('/', '');
+  if ( (roomName == '') || roomName == undefined )
+    ans = 'ERR';
+  else {
+    for ( var k in rooms)
+      if ( k == rName )
+        ans = 'X';
+    if ( ans == undefined )
+      ans = 'OK';
+  }
+
+  socket.emit('createRoom_Response', {
+    answer : ans,
+    rName : roomName
   });
+});
 
-  socket.on('evil', (request)=>{
-    evil.skill(socket, io, request, gameList);
+
+socket.on('ready_Request', function(isReady) {
+  //DB_updateRDY(socket.id, isReady);
+  //let nowreadys = DB_nowReady(data.rName);
+  //let ans;
+  socket.emit('ready_Response', {
+    answer : 'OK',
+    nowready : 1
   });
+});
+socket.on('start_Request', (roomName)=>{
+  //DB.get_SOCPRACTICE(serverDB, roomName, soclist)
 
-  socket.on('login_Request', () =>  {
-    lobby.Login(socket);
-    userCount++;
-    DB.insert_newSoc(serverDB, `${socket.id}`);
-    allsoc['lobby'].push(socket);
-  });
-
-  socket.on('lobbyChat_Request', function(msg) {
-    lobby.Chat(socket, msg);
-  });
-
-  socket.on('realTime_lobby_Request', () => {
-    lobby.realTime(socket);
-  });
-  socket.on('BACK_beforeGame', (roomName) => {
-    inRoom.BACK(socket, roomName);
-  });
-
-  socket.on('BACK_COMPLETED', function(roomName) {
-    inRoom.BACK_COMPLETED(socket, roomName);
-    DB.update_Location(serverDB, 'lobby', socket.id);
-    tLfR(socket.id, roomName);
-    var rooms = io.sockets.adapter.rooms;
-
-  });
-
-  socket.on('roomChat_Request', function(data) {
-    inRoom.Chat(socket, data);
-  });
-
-  socket.on('realTime_inRoom_Request', (rName) => {
-    inRoom.realTime(socket, rName, io);
-  });
-
-  socket.on('joinProcessHTML_Request', ()=> {
-    joinProcess.HTML(socket);
-  });
-
-  socket.on('JOIN_Request', (roomName) => {
-    joinProcess.JOIN(socket, roomName, io, gameList);
-  });
-
-  socket.on('JOIN_COMPLETED', (roomName) => {
-    joinProcess.JOIN_COMPLETED(socket, roomName);
-    DB.update_Location(serverDB, roomName, socket.id);
-    tRfL(socket.id, roomName);
-  });
-  socket.on('realTime_roomList_Request', ()=> {
-    joinProcess.realTime(socket, io);
-  });
-
-  socket.on('createRoom_Request', function(roomName) {
-    var rooms = io.sockets.adapter.rooms;
-    var ans;
-    var rName = roomName.replace('/', '');
-    if ( (roomName == '') || roomName == undefined )
-      ans = 'ERR';
-    else {
-      for ( var k in rooms)
-        if ( k == rName )
-          ans = 'X';
-      if ( ans == undefined )
-        ans = 'OK';
-    }
-
-    socket.emit('createRoom_Response', {
-      answer : ans,
-      rName : roomName
-    });
-  });
-
-
-  socket.on('ready_Request', function(isReady) {
-    //DB_updateRDY(socket.id, isReady);
-    //let nowreadys = DB_nowReady(data.rName);
-    //let ans;
-    socket.emit('ready_Response', {
-      answer : 'OK',
-      nowready : 1
-    });
-  });
-  socket.on('start_Request', (roomName)=>{
-    //DB.get_SOCPRACTICE(serverDB, roomName, soclist)
-
-    DB.insert_newGame(serverDB, roomName);
-    var soclist = [];
-    DB.get_socList(serverDB, roomName, soclist)
-      .then(()=> {
-        DB.start(serverDB, roomName, soclist);
-        countUsersIn[roomName] = soclist.length;
-        var scr = universal.rand(soclist, COLORS, ROLES);
-        socs = scr[0].slice();
-        colors = scr[1].slice();
-        roles = scr[2].slice();
-        //['Alpha', 'Beta', 'Chaos','Q','V','Eve','Ruby','Tetto'];
-        for(var k=0; k < soclist.length; k++) {
-          DB.update_Role(serverDB, roles[k], socs[k], roomName);
-          io.in(soclist[k]).emit('start_Response', {
-            role: roles[k],
-            color : colors[k],
-            sid : soclist[k],
-            rName : roomName
-          });
-        }
-        //universal.CS_RS(gameList, roomName, fetchCount, socs, colors, roles);
-        universal.CS_RS(gameList, roomName, fetchCount, soclist, colors, roles);
-
-      });
-  }); // end of start_Request
-  socket.on('gameFETCH_Completed', (roomName)=> {
-    fetchCount[roomName] = fetchCount[roomName]+1;
-    console.log("fetchCOMPLETED("+roomName+") :"+ fetchCount[roomName]+" countUserIn("+roomName+") = "+countUsersIn[roomName]);
-    if ( fetchCount[roomName] == countUsersIn[roomName] ) {
-      universal.setting(gameList, io, roomName, allsoc)
-      .then(()=>{
-        switchingList[roomName] = [];
-        wait_submit[roomName] = [];
-        outUsersIn[roomName] = 0;
-        console.log('server : setting completed');
-      });
-    }
-  });
-  //참가자들이 명교리스트에 등록하거나 취소하는경우
-  socket.on('nameSwitching_ChangeRequest', async (request)=> {
-    var a = await universal.Change(socket, io, switchingList, request);
-    var rName = request.rName;
-    if ( Object.keys(switchingList[rName]).length == 2) {
-      await sleep(2500);
-      if ( Object.keys(switchingList[rName]).length == 2 ) {
-        //서버에서 클라이언트에 Request함.
-        io.to(rName).emit('nameSwitchingOn_Request', {
-          list : switchingList[rName]
+  DB.insert_newGame(serverDB, roomName);
+  var soclist = [];
+  DB.get_socList(serverDB, roomName, soclist)
+    .then(()=> {
+      DB.start(serverDB, roomName, soclist);
+      countUsersIn[roomName] = soclist.length;
+      var scr = universal.rand(soclist, COLORS, ROLES);
+      socs = scr[0].slice();
+      colors = scr[1].slice();
+      roles = scr[2].slice();
+      //['Alpha', 'Beta', 'Chaos','Q','V','Eve','Ruby','Tetto'];
+      for(var k=0; k < soclist.length; k++) {
+        DB.update_Role(serverDB, roles[k], socs[k], roomName);
+        io.in(soclist[k]).emit('start_Response', {
+          role: roles[k],
+          color : colors[k],
+          sid : soclist[k],
+          rName : roomName
         });
-        switchingList[rName] = [];
       }
-    }
-  });
-  socket.on('gameChat_Request', (request) => {
-    universal.Chat(socket, io, request);
-  });
-  //클라이언트에서 서버에 Response를 보냄. 서버에서 Response를 받으면..
-  socket.on('nameSwitchingOn_Response', async (response)=> {
-    var rName = response.rName;
-    var a = await universal.switchingOn(socket, io, wait_submit, response, gameList[rName].colrole);
-    var obj_length = Object.keys(wait_submit[rName]).length;
-    if ( obj_length == 2) {
-      universal.events(wait_submit[rName], rName, gameList, response.isConfused);
-      io.to(rName).emit('nameSwitching_finally', wait_submit[rName]);
-      for (let k=10; k > 0; k--) {
-        io.to(rName).emit('before_initboard', k);
-        var a = await sleep(1000);
-        if ( k == 1)
-          io.to(rName).emit('initboard', '');
-      }
-      wait_submit[rName] = [];
-    }
-  });
-  socket.on('go_bystander', (roomName)=> {
-    socket.join(roomName+'0000000000bysatander');
-  });
+      //universal.CS_RS(gameList, roomName, fetchCount, socs, colors, roles);
+      universal.CS_RS(gameList, roomName, fetchCount, soclist, colors, roles);
 
-  socket.on('disconnect', async function() {
-    var sid = socket.id;
-    var list = [];
-    var a = await DB.getLoca(serverDB, sid, list);
-    var rName = list[0].nowLocation;
-    if ( rName == 'lobby') {
-      lobby.ANNOUNCE(io, `${socket.id} 님이 로비에서 떠났습니다.`);
+    });
+}); // end of start_Request
+socket.on('gameFETCH_Completed', (roomName)=> {
+  fetchCount[roomName] = fetchCount[roomName]+1;
+  console.log("fetchCOMPLETED("+roomName+") :"+ fetchCount[roomName]+" countUserIn("+roomName+") = "+countUsersIn[roomName]);
+  if ( fetchCount[roomName] == countUsersIn[roomName] ) {
+    universal.setting(gameList, io, roomName, allsoc)
+    .then(()=>{
+      switchingList[roomName] = [];
+      wait_submit[roomName] = [];
+      outUsersIn[roomName] = 0;
+      console.log('server : setting completed');
+    });
+  }
+});
+//참가자들이 명교리스트에 등록하거나 취소하는경우
+socket.on('nameSwitching_ChangeRequest', async (request)=> {
+  var a = await universal.Change(socket, io, switchingList, request);
+  var rName = request.rName;
+  if ( Object.keys(switchingList[rName]).length == 2) {
+    await sleep(2500);
+    if ( Object.keys(switchingList[rName]).length == 2 ) {
+      //서버에서 클라이언트에 Request함.
+      io.to(rName).emit('nameSwitchingOn_Request', {
+        list : switchingList[rName]
+      });
+      switchingList[rName] = [];
     }
-    else { //로비가 아닌경우
-    //게임시작전 떠났을때
-    if ( gameList[rName] == undefined) {
-      inRoom.ANNOUNCE(io, rName, `${socket.id} 님이 방에서 나갔습니다.`);
+  }
+});
+socket.on('gameChat_Request', (request) => {
+  universal.Chat(socket, io, request);
+});
+//클라이언트에서 서버에 Response를 보냄. 서버에서 Response를 받으면..
+socket.on('nameSwitchingOn_Response', async (response)=> {
+  var rName = response.rName;
+  var a = await universal.switchingOn(socket, io, wait_submit, response, gameList[rName].colrole);
+  var obj_length = Object.keys(wait_submit[rName]).length;
+  if ( obj_length == 2) {
+    universal.events(wait_submit[rName], rName, gameList, response.isConfused);
+    io.to(rName).emit('nameSwitching_finally', wait_submit[rName]);
+    for (let k=10; k > 0; k--) {
+      io.to(rName).emit('before_initboard', k);
+      var a = await sleep(1000);
+      if ( k == 1)
+        io.to(rName).emit('initboard', '');
     }
-    else { //게임시작후 떠났을때
-      outUsersIn[rName] = outUsersIn[rName] + 1;
+    wait_submit[rName] = [];
+  }
+});
+socket.on('go_bystander', (roomName)=> {
+  socket.join(roomName+'0000000000bysatander');
+});
+
+socket.on('disconnect', async function() {
+  var sid = socket.id;
+  var list = [];
+  var a = await DB.getLoca(serverDB, sid, list);
+  var rName = list[0].nowLocation;
+  if ( rName == 'lobby') {
+    lobby.ANNOUNCE(io, `${socket.id} 님이 로비에서 떠났습니다.`);
+  }
+  else { //로비가 아닌경우
+  //게임시작전 떠났을때
+  if ( gameList[rName] == undefined) {
+    inRoom.ANNOUNCE(io, rName, `${socket.id} 님이 방에서 나갔습니다.`);
+  }
+  else { //게임시작후 떠났을때
+    outUsersIn[rName] = outUsersIn[rName] + 1;
+    if (outUsersIn[rName] == countUsersIn[rName]) {
+      deleteRname(rName);
+    }
+    else {
       var colsoc = gameList[rName].colsoc;
       var isalive = gameList[rName].isAlive;
       var colrole = gameList[rName].colrole;
@@ -262,59 +266,48 @@ io.on('connection', function(socket) {
       }
       var keyRole = colrole[keyColor];
       //살아있는경우 게임에서 제외함.
+      if ( isalive[keyRole] == true) {
+        universal.death(io, rName, keyColor, gameList); }
+      universal.ANNOUNCE(io, rName, keyColor, '님이 게임에서 떠났습니다.');
+    } // delRname이 아닐떄
+  } // 게임시작후 떠났을때
+} // 로비가 아닌경우
+  DB.delete_Soc(serverDB, `${socket.id}`);
 
-        if (outUsersIn[rName] == countUsersIn[rName]) {
-          deleteRname(rName);
-        }
-        else {
-          if ( isalive[keyRole] == true) {
-            universal.death(io, rName, keyColor, gameList); }
-          universal.ANNOUNCE(io, rName, keyColor, '님이 게임에서 떠났습니다.');
-        }
-    }
+  userCount--;
+  if ( userCount < 0) {
+    userCount = 0;
   }
-   DB.delete_Soc(serverDB, `${socket.id}`);
+});
+socket.on('BACK_gameOver', (response)=> {
+  var rName = response.rName;
+  var isOver = response.isgameOver;
+  var iswin = response.isWin;
+  var color = response.color;
+  outUsersIn[rName] = outUsersIn[rName] + 1;
+  if (outUsersIn[rName] == countUsersIn[rName]) {
+    deleteRname(rName);
+  }
+  else {
+    if ( isOver == false) {
+      //DB에 패배저장
+      //
+      var isalive = gameList[rName].isAlive;
+      var colrole = gameList[rName].colrole;
 
-   userCount--;
-   if ( userCount < 0) {
-     userCount = 0;
-   }
-  });
-  socket.on('BACK_gameOver', (response)=> {
-    var rName = response.rName;
-    var isOver = response.isgameOver;
-    var iswin = response.isWin;
-    var color = response.color;
-    outUsersIn[rName] = outUsersIn[rName] + 1;
-      if ( isOver == true) {
-        //DB에 iswin 저장
-        //
-        if (outUsersIn[rName] == countUsersIn[rName]) {
-          deleteRname(rName);
-        }
-        else
-          universal.ANNOUNCE(io, rName, color, '님이 게임에서 떠났습니다.');
-      }
-      else if ( isOver == false) {
-        //DB에 패배저장
-        //
-        var isalive = gameList[rName].isAlive;
-        var colrole = gameList[rName].colrole;
-        var keyRole = colrole[color];
-
-        if (outUsersIn[rName] == countUsersIn[rName]) {
-          deleteRname(rName);
-        }
-        else {
-          //살아있는경우 게임에서 제외함.
-          if ( isalive[keyRole] == true) {
-            universal.death(io, rName, color, gameList); }
-          universal.ANNOUNCE(io, rName, color, '님이 게임에서 떠났습니다.');
-        }
-      }
-      var destination = '/game';
-      inRoom.redirect(socket, destination);
-    });
+        //살아있는경우 게임에서 제외함.
+      if ( isalive[colrole[color]] == true)
+        universal.death(io, rName, color, gameList);
+    }
+    else {
+      //DB에 iswin 저장
+      //
+      sleep(100);
+    }
+    universal.ANNOUNCE(io, rName, color, '님이 게임에서 떠났습니다.');
+  }
+  inRoom.redirect(socket, '/game');
+});
     //
     //
 }); // end of io.on
