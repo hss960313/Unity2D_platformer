@@ -49,6 +49,7 @@ function skill_emit() {
 }
 ClientSoc.on('observe', ()=>{
   timeTroubleList.push('정체밝히기');
+  briefing('', '당신은 감시당하고 있습니다.');
   Id('정체밝히기').disabled = true;
   setTimeout(()=>{
     timeTroubleList.pop();

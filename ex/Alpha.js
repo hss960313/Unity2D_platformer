@@ -41,7 +41,7 @@ function skill_Request() {
   if ( Id(Id('selectedSkill').value).disabled == true) {
     switch ( Id('selectedSkill').value ) {
       case '심판':
-        skill_ColorRole(3, '대상을 심판할수 있습니다.');
+        skill_ColorRole(60, '대상을 심판할수 있습니다.');
         break;
       case '파멸':
         skill_ColorRole(0, '대상을 파멸시킬수 있습니다.');

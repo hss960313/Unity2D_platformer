@@ -52,7 +52,7 @@ timeTroubleList.push('심판의_조각');
 timeTroubleList.push('동맹하기');
 ClientSoc.on('EVE_1', (response)=>{
   if ( response.isArrest == 'O') {
-    briefing('', '카오스를 검거하는데 성공했습니다. 심판의 조각을 얻습니다.');
+    briefing('', '카오스를 검거하는데 성공했습니다. 심판의 조각과 수사권을 얻습니다.');
     hasSUSA = true;
     timeTroubleList.pop();
     timeTroubleList.pop();

@@ -262,14 +262,12 @@ async function death(io, roomName, color, gameList) {
         colrole : gameList[roomName].colrole
       });
     }
-    console.log(" ");
-    console.log("go");
+  
     io.in(roomName).emit('DEATH', {
       color : color,
       announce : `님이 사망하셨습니다.`
     });
-    console.log("od");
-    console.log(" ");
+
     var a = await sleep(100);
     if ( key == 'Q') {
       for ( var j in sockets) {

@@ -62,8 +62,7 @@
     </div>
   </div>
   <div id="game_chatBox">
-    !SYSTEM! 게임이 시작되었습니다.<p>
-
+    !S Y S T E M ! 　　게임이 시작되었습니다.<p>
   </div>
   <div id="radioBox">
   선택한 그룹에 채팅 :　　
@@ -83,9 +82,5 @@
   <button id="detail" onclick="contentView();" >내 역할 자세히 보기</button>
     <div id="detailContent"></div>
   </div>
-  <div id="helpDiv"></p>색깔 하나와 이름 하나를 골라 그 색깔의 참가자의 정체가 그 이름이라면 게임에서 제외한다.
-  (재사용 대기시간 60초)<p>
-4번 실패하는 경우 게임에서 패배한다.</p>
-Q가 죽기전에는 상대가 V인경우에는 죽일 수 없다.</p>
-같은 이름을 두 번 실패하면 그 이름은 심판할 수 없다.</p>
+  <div id="helpDiv">
 </div>

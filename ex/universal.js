@@ -49,6 +49,7 @@ ClientSoc.on('start_Response', (response)=>{
       classAttr('help', 'onMouseLeave', 'helpOff();');
       classAttr('Skillbutton','onclick', 'clickSkill(this)');
       ClientSoc.emit('gameFETCH_Completed', response.rName);
+      document.getElementsByTagName('title')[0].innerHTML = Id('myRole').value;
     });
 });
 
@@ -262,7 +263,7 @@ ClientSoc.on('ANNOUNCE', (response)=>{
   else if ( e == 'arrest') {
     briefing(color , '님이 상태이상 #에 걸렸습니다.');
     if ( response.isArrest == 'O')
-      briefing('', '알파가 검거됐습니다.');
+      briefing('', '알파가 검거됐습니다. 탐정팀의 승리입니다.');
     else
       briefing(response.failColor, '가 알파를 검거하는데 실패했습니다. '+IMG(response.failColor)+"는 죽을 것입니다.");
   }
@@ -654,19 +655,18 @@ function showResult() {
 function infoModal_Open(whowin, colrole){
   if ( Id('modal_gameOver')) {
     if ( whowin == 'good')
-      Id('Announce_gameOver').innerHTML = "게임이 종료되었습니다.<p> 알파의 검거/사망으로 탐정팀이 이겼습니다.<p>　";
+      Id('Announce_gameOver').innerHTML = "게임이 종료되었습니다.<p> 알파의 검거/사망으로 탐정팀이 이겼습니다.";
     else if ( whowin == 'evil')
-      Id('Announce_gameOver').innerHTML = "게임이 종료되었습니다.<p> 알파를 검거/사망시키지 못했으므로 범인팀이 승리합니다.<p>　";
-    /*
+      Id('Announce_gameOver').innerHTML = "게임이 종료되었습니다.<p> 알파를 검거/사망시키지 못했으므로 범인팀이 승리합니다.";
+
     for ( key in colrole) {
       Id('Announce_gameOver').innerHTML += IMG(key) + "의 정체는 "+colrole[key]+"입니다.<p>";
     }
-    */
-    Id('Announce_gameOver').innerHTML += RoleRadio();
+
     Id('Announce_gameOver').innerHTML += "<button onclick='closeModal();' style='float : right; height : 30px;'>창 닫기</button><button onclick='BACK2Lobby();' style='float : left; height : 30px;'>로비로 이동</button><p>";
 
     Id('Announce_gameOver').style.width = '300px';
-    Id('Announce_gameOver').style.height = '450px';
+    Id('Announce_gameOver').style.height = '500px';
     Id('Announce_gameOver').style.padding= '20px';
 
     Id('modal_gameOver').style.display = 'block';

@@ -17,9 +17,9 @@ const joinProcess = require('./SERVER_joinProcessJS');
 const TIME = require('./SERVER_TimeJS');
 
 const UNIVERSAL = require('./SERVER_universalJS');
-//const serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
+const serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
 
-const serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sktkffleh!@3', 'node960313');
+//const serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sktkffleh!@3', 'node960313');
 const GOOD = require('./SERVER_goodJS');
 const EVIL = require('./SERVER_evilJS');
 DB.connect(serverDB)
@@ -53,6 +53,7 @@ var timetable = {};
 var gameList = {};
 var switchingList = {};
 var wait_submit = {};
+var outUsersIn = {};
 DB.init(serverDB);
 io.on('connection', function(socket) {
 /*
@@ -94,34 +95,13 @@ io.on('connection', function(socket) {
   socket.on('BACK_beforeGame', (roomName) => {
     inRoom.BACK(socket, roomName);
   });
-  socket.on('BACK_gameOver', (response)=> {
-    var rName = response.rName;
-    var isOver = response.isgameOver;
-    var iswin = response.isWin;
-    var color = response.color;
-    universal.init_ally(socket, gameList[rName].sockets, rName)
-    .then(()=>{
-      universal.ANNOUNCE(io, rName, color, '님이 게임에서 떠났습니다.');
-      if ( isOver == true) {
-        //DB에 iswin 저장
-      }
-      else if ( isOver == false) {
-        //DB에 패배저장
-        //
-        var isalive = gameList[rName].isAlive;
-        var colrole = gameList[rName].colrole;
-        var keyRole = colrole[color];
-        //살아있는경우 게임에서 제외함.
-        if ( isalive[keyRole] == true)
-          universal.death(io, rName, color, gameList);
-      }
-      inRoom.BACK(socket, rName);
-    });
-  });
+
   socket.on('BACK_COMPLETED', function(roomName) {
     inRoom.BACK_COMPLETED(socket, roomName);
     DB.update_Location(serverDB, 'lobby', socket.id);
     tLfR(socket.id, roomName);
+    var rooms = io.sockets.adapter.rooms;
+
   });
 
   socket.on('roomChat_Request', function(data) {
@@ -196,14 +176,14 @@ io.on('connection', function(socket) {
         for(var k=0; k < soclist.length; k++) {
           DB.update_Role(serverDB, roles[k], socs[k], roomName);
           io.in(soclist[k]).emit('start_Response', {
-            role: ROLES[k],
+            role: roles[k],
             color : colors[k],
             sid : soclist[k],
             rName : roomName
           });
         }
         //universal.CS_RS(gameList, roomName, fetchCount, socs, colors, roles);
-        universal.CS_RS(gameList, roomName, fetchCount, soclist, colors, ROLES);
+        universal.CS_RS(gameList, roomName, fetchCount, soclist, colors, roles);
 
       });
   }); // end of start_Request
@@ -213,9 +193,9 @@ io.on('connection', function(socket) {
     if ( fetchCount[roomName] == countUsersIn[roomName] ) {
       universal.setting(gameList, io, roomName, allsoc)
       .then(()=>{
-        console.log(gameList[roomName].events);
         switchingList[roomName] = [];
         wait_submit[roomName] = [];
+        outUsersIn[roomName] = 0;
         console.log('server : setting completed');
       });
     }
@@ -273,6 +253,7 @@ io.on('connection', function(socket) {
       inRoom.ANNOUNCE(io, rName, `${socket.id} 님이 방에서 나갔습니다.`);
     }
     else { //게임시작후 떠났을때
+      outUsersIn[rName] = outUsersIn[rName] + 1;
       var colsoc = gameList[rName].colsoc;
       var isalive = gameList[rName].isAlive;
       var colrole = gameList[rName].colrole;
@@ -281,12 +262,15 @@ io.on('connection', function(socket) {
       }
       var keyRole = colrole[keyColor];
       //살아있는경우 게임에서 제외함.
-      console.log("keyRole= ",keyRole);
-      console.log("isalive= ",isalive[keyRole]);
-      if ( isalive[keyRole] == true)
-        universal.death(io, rName, keyColor, gameList);
 
-      universal.ANNOUNCE(io, rName, keyColor, '님이 게임에서 떠났습니다.');
+        if (outUsersIn[rName] == countUsersIn[rName]) {
+          deleteRname(rName);
+        }
+        else {
+          if ( isalive[keyRole] == true) {
+            universal.death(io, rName, keyColor, gameList); }
+          universal.ANNOUNCE(io, rName, keyColor, '님이 게임에서 떠났습니다.');
+        }
     }
   }
    DB.delete_Soc(serverDB, `${socket.id}`);
@@ -296,7 +280,41 @@ io.on('connection', function(socket) {
      userCount = 0;
    }
   });
+  socket.on('BACK_gameOver', (response)=> {
+    var rName = response.rName;
+    var isOver = response.isgameOver;
+    var iswin = response.isWin;
+    var color = response.color;
+    outUsersIn[rName] = outUsersIn[rName] + 1;
+      if ( isOver == true) {
+        //DB에 iswin 저장
+        //
+        if (outUsersIn[rName] == countUsersIn[rName]) {
+          deleteRname(rName);
+        }
+        else
+          universal.ANNOUNCE(io, rName, color, '님이 게임에서 떠났습니다.');
+      }
+      else if ( isOver == false) {
+        //DB에 패배저장
+        //
+        var isalive = gameList[rName].isAlive;
+        var colrole = gameList[rName].colrole;
+        var keyRole = colrole[color];
 
+        if (outUsersIn[rName] == countUsersIn[rName]) {
+          deleteRname(rName);
+        }
+        else {
+          //살아있는경우 게임에서 제외함.
+          if ( isalive[keyRole] == true) {
+            universal.death(io, rName, color, gameList); }
+          universal.ANNOUNCE(io, rName, color, '님이 게임에서 떠났습니다.');
+        }
+      }
+      var destination = '/game';
+      inRoom.redirect(socket, destination);
+    });
 }); // end of io.on
 
 
@@ -306,6 +324,10 @@ function sleep(t){
         resolve(0);
      }, t);
   });
+}
+function deleteRname(rName) {
+  clearInterval(gameList[rName].timeflow);
+  delete gameList[rName];
 }
 function tRfL(sid, rname) {
   var soclist_l = allsoc['lobby'];

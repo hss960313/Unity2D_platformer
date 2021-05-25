@@ -24,6 +24,9 @@ ClientSoc.on('roomChat_Response', (response) => {
 
   }
 });
+ClientSoc.on('redirection', (response)=>{
+  window.location.href = response.redirection;
+});
 function roomChat_ADD(sid, msg) {
   var li = document.createElement('li');
   li.innerHTML = sid + ' : ' + msg;

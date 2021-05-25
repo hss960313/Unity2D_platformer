@@ -9,7 +9,11 @@ inRoom.BACK = (socket, roomName) =>{
     sid : socket.id
   });
 }
-
+inRoom.redirect = function(socket, destination) {
+  socket.emit('redirection', {
+    redirection : destination
+  });
+}
 inRoom.BACK_COMPLETED = (socket, roomName) =>{
   socket.leave(roomName);
   socket.join('lobby');

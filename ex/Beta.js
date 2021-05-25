@@ -19,8 +19,7 @@ ClientSoc.on('DEATH', (death) =>{
     if ( death.color == Id('myColor').value )
       myDEATH();
     else
-      var o = delColor(death.color);
-    if ( o == true)
+      delColor(death.color);
       briefing(death.color, death.announce);
   }
 });

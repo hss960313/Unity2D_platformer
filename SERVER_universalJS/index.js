@@ -109,14 +109,10 @@ proto.death = async function(io, roomName, color, gameList) {
     });
   }
 
-  console.log(" ");
-  console.log("uni");
   io.in(roomName).emit('DEATH', {
     color : color,
     announce : `님이 사망하셨습니다.`
   });
-  console.log("versal");
-  console.log(" ");
 
 }
 
@@ -131,7 +127,6 @@ proto.Chat = function(socket, io, request) {
   var whom = request.whom;
   var msg = request.msg;
   var color = request.color;
-  console.log("rNAME", rName);
   switch ( whom ) {
     case '전체':
       io.in(rName).emit('gameChat_All', {
@@ -189,8 +184,7 @@ proto.events = function(submitList, rName, gameList, isConfused){
   var colorB = submitList[1].color;
   var sockets = gameList[rName].sockets;
   var colsoc = gameList[rName].colsoc;
-  console.log("realA ",colrole[colorA]);
-  console.log("realB ",colrole[colorB]);
+
   //
   if ( events.alphabetaE == false) {
     if ( (colrole[colorA] == 'Alpha') && (colrole[colorB] == 'Beta')) {
@@ -286,7 +280,6 @@ function initally(socket, soclist, rName) {
     var sid = socket.id;
     socket.leave(rName+'0000000000bysatander');
     for ( let k=0; k < soclist.length; k++) {
-      console.log("leave id=", soclist[k].id);
       if ( sid != soclist[k].id)
         socket.leave(soclist[k].id);
     }

@@ -34,9 +34,7 @@ async function Alpha_1(socket, io, rName, gameList, color, role, failcount) {
     color : color
   });
   var a = await sleep(100);
-  for ( var key in failcount) {
-    console.log("failcount["+key+']= ',failcount[key]);
-  }
+
   let ans;
   let colsoc = gameList[rName].colsoc;
   let rolesoc  = gameList[rName].rolesoc;
@@ -64,7 +62,6 @@ async function Alpha_1(socket, io, rName, gameList, color, role, failcount) {
     var sum =0;
     for ( let i=0; i < failcount.length; i++)
       sum += failcount[i];
-    console.log(sum);
     if ( sum >= 4)
       ans = 'death';
   }
@@ -259,14 +256,11 @@ async function death(io, roomName, gameList, color) {
     });
   }
 
-  console.log(" ");
-  console.log("ev");
   io.in(roomName).emit('DEATH', {
     color : color,
     announce : `님이 사망하셨습니다.`
   });
-  console.log("il");
-  console.log(" ");
+
 
 } // end of death
 
