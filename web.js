@@ -176,14 +176,14 @@ socket.on('start_Request', (roomName)=>{
       for(var k=0; k < soclist.length; k++) {
         DB.update_Role(serverDB, roles[k], socs[k], roomName);
         io.in(soclist[k]).emit('start_Response', {
-          role: ROLES[k],
+          role: roles[k],
           color : colors[k],
           sid : soclist[k],
           rName : roomName
         });
       }
       //universal.CS_RS(gameList, roomName, fetchCount, socs, colors, roles);
-      universal.CS_RS(gameList, roomName, fetchCount, soclist, colors, ROLES);
+      universal.CS_RS(gameList, roomName, fetchCount, soclist, colors, roles);
 
     });
 }); // end of start_Request
