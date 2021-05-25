@@ -17,9 +17,9 @@ const joinProcess = require('./SERVER_joinProcessJS');
 const TIME = require('./SERVER_TimeJS');
 
 const UNIVERSAL = require('./SERVER_universalJS');
-//const serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
+const serverDB = DB.create(mysql, 'localhost', '3306', 'root', 'sk!@3tkffleh', 'HSS');
 
-const serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sktkffleh!@3', 'node960313');
+//const serverDB = DB.create(mysql, '10.0.0.1', '3306', 'node960313', 'sktkffleh!@3', 'node960313');
 const GOOD = require('./SERVER_goodJS');
 const EVIL = require('./SERVER_evilJS');
 DB.connect(serverDB)
@@ -29,9 +29,9 @@ DB.connect(serverDB)
     universal = new UNIVERSAL(TIME);
   });
 const COLORS = ['red', 'blue', 'green', 'brown', 'grey', 'orange', 'purple', 'deeppink'];
-//const ROLES = ['Alpha', 'Beta', 'Chaos','Q','V','EVE','Ruby','Tetto'];
+const ROLES = ['Alpha', 'Beta', 'Chaos','Q','V','EVE','Ruby','Tetto'];
 //const ROLES = ['Q', 'Beta', 'V', 'Ruby', 'Tetto', 'Chaos', 'EVE', 'Alpha'];
-const ROLES = ['Q', 'Beta', 'V', 'Ruby', 'Tetto', 'EVE', 'Alpha', 'Chaos'];
+//const ROLES = ['Q', 'Beta', 'V', 'Ruby', 'Tetto', 'EVE', 'Alpha', 'Chaos'];
 app.use(express.static(__dirname));
 
 app.get('/', function(request, response) {
@@ -176,14 +176,14 @@ socket.on('start_Request', (roomName)=>{
       for(var k=0; k < soclist.length; k++) {
         DB.update_Role(serverDB, roles[k], socs[k], roomName);
         io.in(soclist[k]).emit('start_Response', {
-          role: roles[k],
+          role: ROLES[k],
           color : colors[k],
           sid : soclist[k],
           rName : roomName
         });
       }
       //universal.CS_RS(gameList, roomName, fetchCount, socs, colors, roles);
-      universal.CS_RS(gameList, roomName, fetchCount, soclist, colors, roles);
+      universal.CS_RS(gameList, roomName, fetchCount, soclist, colors, ROLES);
 
     });
 }); // end of start_Request
@@ -207,11 +207,30 @@ socket.on('nameSwitching_ChangeRequest', async (request)=> {
   if ( Object.keys(switchingList[rName]).length == 2) {
     await sleep(2500);
     if ( Object.keys(switchingList[rName]).length == 2 ) {
-      //서버에서 클라이언트에 Request함.
-      io.to(rName).emit('nameSwitchingOn_Request', {
-        list : switchingList[rName]
-      });
-      switchingList[rName] = [];
+      if ( gameList[rName].isOn == false) {
+        gameList[rName].isOn = true;
+        var col1 = switchingList[rName][0];
+        var col2 = switchingList[rName][1];
+        var colsoc = gameList[rName].colsoc;
+        var sockets = gameList[rName].sockets;
+        var socA, socB;
+        for (var k=0; k < sockets.length; k++) {
+          if ( colsoc[col1] == sockets[k].id )
+            socA = sockets[k];
+          if ( colsoc[col2] == sockets[k].id )
+            socB = sockets[k];
+        }
+
+        io.in(rName).emit('switching_prepare', {
+          list :switchingList[rName]
+        });
+        switchingList[rName] = [];
+        for (var i= 10; i >= 0; i--) {
+          socA.emit('before_closeModal', i);
+          socB.emit('before_closeModal', i);
+          var a = await sleep(1000);
+        }
+      }
     }
   }
 });
@@ -226,12 +245,12 @@ socket.on('nameSwitchingOn_Response', async (response)=> {
   if ( obj_length == 2) {
     universal.events(wait_submit[rName], rName, gameList, response.isConfused);
     io.to(rName).emit('nameSwitching_finally', wait_submit[rName]);
-    for (let k=10; k > 0; k--) {
+    for (let k=13; k > 0; k--) {
       io.to(rName).emit('before_initboard', k);
       var a = await sleep(1000);
-      if ( k == 1)
-        io.to(rName).emit('initboard', '');
     }
+    io.to(rName).emit('initboard', '');
+    gameList[rName].isOn = false;
     wait_submit[rName] = [];
   }
 });
@@ -244,12 +263,7 @@ socket.on('disconnect', async function() {
   var list = [];
   var a = await DB.getLoca(serverDB, sid, list);
   var rName = list[0].nowLocation;
-  var key = '';
-  for (let k=0; k < allsoc[rName].length; k++) {
-    if ( sid == allsoc[rName][k].id)
-      allsoc[rName].splice(k, 1);
-      break;
-  }
+
   if ( rName == 'lobby') {
     lobby.ANNOUNCE(io, `${socket.id} 님이 로비에서 떠났습니다.`);
   }
@@ -272,14 +286,19 @@ socket.on('disconnect', async function() {
       }
       var keyRole = colrole[keyColor];
       //살아있는경우 게임에서 제외함.
-      if ( isalive[keyRole] == true) {
-        universal.death(io, rName, keyColor, gameList); }
+      if ( isalive[keyRole] == true)
+        universal.death(io, rName, keyColor, gameList);
       universal.ANNOUNCE(io, rName, keyColor, '님이 게임에서 떠났습니다.');
     } // delRname이 아닐떄
   } // 게임시작후 떠났을때
 } // 로비가 아닌경우
+  for (let k=0; k < allsoc[rName].length; k++) {
+    if ( sid == allsoc[rName][k].id) {
+      allsoc[rName].splice(k, 1);
+      break;
+    }
+  }
   DB.delete_Soc(serverDB, `${socket.id}`);
-
   userCount--;
   if ( userCount < 0) {
     userCount = 0;

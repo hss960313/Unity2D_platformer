@@ -83,7 +83,7 @@ ClientSoc.on('Alpha_2', (response)=> {
   else if ( ans == 'X') briefing('', `당신은 `+IMG(response.color)+`를 파멸시키는데에 실패했습니다. `);
 });
 ClientSoc.on('switchingE', (response)=>{
-  briefing('', response.announce);
+  briefing('', response.announce1 +" "+ IMG(response.color)+" "+response.announce2);
 });
 function skill_disabled() {
   disabled('심판');

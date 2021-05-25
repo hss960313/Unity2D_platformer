@@ -65,7 +65,7 @@ ClientSoc.on('Beta_2', () => {
   },1000*60)
 });
 ClientSoc.on('switchingE', (response)=>{
-  briefing('', response.announce);
+  briefing('', response.announce1 +" "+ IMG(response.color)+" "+response.announce2);
 });
 function skill_noModal(coolTime) {
   reuse_Request(coolTime);

@@ -93,7 +93,7 @@ ClientSoc.on('arrest', (response)=>{
   }
 });
 ClientSoc.on('switchingE', (response)=>{
-  briefing('', response.announce);
+  briefing('', response.announce1 +" "+ IMG(response.color)+" "+response.announce2);
 });
 function skill_disabled() {
   disabled('Q확인');

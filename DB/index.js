@@ -45,13 +45,26 @@ DB.init = function(connection) {
         Q VARCHAR(30),
         V VARCHAR(30),
         EVE  VARCHAR(30),
-        RUBY  VARCHAR(30),
-        TETTO  VARCHAR(30))`, (error)=> {
+        Ruby  VARCHAR(30),
+        Tetto  VARCHAR(30))`, (error)=> {
           if ( error) console.log("gameList already existed.");
       });
     }
     else console.log('truncate gameList ok');
   });
+  /*
+  connection.query('truncate table rank', (error)=> {
+    if ( error) {
+      console.log("truncate gameList err");
+      connection.query(`CREATE TABLE rank (
+        uId VARCHAR(20),
+        win VARCHAR(5),
+        lose VARCHAR(5))`, (error)=> {
+          if ( error) console.log("rank already existed.");
+      });
+    }
+    else console.log('truncate rank ok');
+  */
 }
 DB.connect = function(connection) {
   return new Promise(function(resolve, reject) {
@@ -102,8 +115,8 @@ DB.update_Location = function(connection, location, sid) {
   });
 }
 
-DB.update_Role = function(connection, role, soc, gname) {
-  connection.query('update gameList SET '+role+' = ? where gName = ?', [soc, gname], (err, res)=> {
+DB.update_Role = function(connection, role, socid, gname) {
+  connection.query('UPDATE gameList SET '+role+' = ? where gName = ?', [socid, gname], (err, res)=> {
     if (err) console.log("roleupdate err ");
     else console.log("roleupdate ok");
   });
@@ -130,9 +143,7 @@ DB.get_SOCPRACTICE = async function(conn, list) {
 
 }
 DB.get_socList = async function(conn, rName, list) {
-
   var a = await QQ(conn, rName, list);
-  console.log("soclist in rName(",rName,") = ",list);
 }
 
 function Q(conn, query, list) {

@@ -439,15 +439,6 @@ function skillCoolTime(eid, value) {
         }, 1000);
     });
 }
-function switching_selectLimit(value) {
-  return new Promise((resolve, reject) => {
-    if ( Id('switchinglimit'))
-      Id('switchinglimit').value =""+ `남은 선택시간 : ${value}초`;
-      setTimeout(()=> {
-        resolve(0);
-      },1000);
-    });
-}
 
 function skill_Prompt(coolTime, announce) {
   Id('modal_Prompt').style.display = 'block';
@@ -488,59 +479,64 @@ function nameSwitching_Initialize() {
   return ""+`
   <div id="nameSwitching_left">이름교환 대기리스트 : </div>`;
 }
-
-async function switching_Role() {
-  Id('selectRole').innerHTML = '<input type="text" id="switchinglimit">'+RoleRadio()+`
-  <button id='submitRole' onclick="closeModal();" disabled>제출</button>
-  `;
-  Id('modal_Role').style.display = "block";
-  for (var k=10; k > 0; k--) {
-    var a = await switching_selectLimit(k);
-    if ( isRolemodalClosed() == true)
-      break;
-  }
-  closeModal();
-  if ( k == 0) return false;
-  else return true;
-}
-
-function isRolemodalClosed() {
-  if ( Id('modal_Role').style.display == "none") return true;
-  else return false;
-}
 //이름교환이 시작됨(두명의 플레이어에게 시간내에 이름을 서버에 제출하게 함)
 //두명을 제외한 플레이어들은 제출이 다 완료될때까지 기다림.
-ClientSoc.on('nameSwitchingOn_Request', (response)=> {
+ClientSoc.on('switching_prepare', (response)=> {
   Id('nameSwitching_right').style.display = 'none';
   switchingOn(response.list);
 });
 function switchingOn(list) {
   // 내가 이름을 내야 하는 경우(둘중에 하나가 나인경우)
-  for (let k=0; k < list.length; k++) {
-    if ( Id('myColor').value == list[k]) {
-      Id('nameSwitching_left').innerHTML = '역할을 선택해 주세요.';
-      switching_Role()
-        .then((result)=> {
-          if ( result == true)
-            Id('nameSwitching_left').innerHTML = '상대방을 기다리고 있습니다..';
-          ClientSoc.emit('nameSwitchingOn_Response', {
-            result : result,
-            selectedRole : Id('selectedRole').value,
-            rName : Id('inRoom_rName').value,
-            color : Id('myColor').value,
-            isConfused : isConfused
-          });
-        });
-      break;
-      }
-    // 이름을 내지 않는 경우(둘다 내가 아닌경우)
-      if ( k == list.length-1 )
-        Id('nameSwitching_left').innerHTML = '다른 플레이어들이 이름교환 중입니다..';
-    } // end of for
-
+  var color1 = list[0];
+  var color2 = list[1];
+  if ( Id('myColor').value == color1 || Id('myColor').value == color2 ) {
+    switching_Role();
+    Id('nameSwitching_left').innerHTML = '역할을 선택해 주세요.';
+  }
+  else {    // 이름을 내지 않는 경우(둘다 내가 아닌경우)
+    Id('nameSwitching_left').innerHTML = '다른 플레이어들이 이름교환 중입니다..';
+  }
 }
+ClientSoc.on('before_closeModal', (response)=> {
+  if ( response > 0) {
+    if ( Id('switchinglimit'))
+      Id('switchinglimit').value =""+ `남은 선택시간 : ${response}초`;
+  }
+  else if ( isRolemodalClosed() == false )
+    SR_closeModal();
+});
+async function switching_Role() {
+  Id('selectRole').innerHTML = '<input type="text" id="switchinglimit">'+RoleRadio()+`
+  <button id='submitRole' onclick="SR_closeModal();" disabled>제출</button>
+  `;
+  Id('modal_Role').style.display = "block";
+}
+function SR_closeModal() {
+  var result = false;
+  closeModal();
+  Id('nameSwitching_left').innerHTML = '상대방을 기다리고 있습니다..';
+  if ( Id('switchinglimit').value )
+    result = true;
+  else
+    result = false;
+  ClientSoc.emit('nameSwitchingOn_Response', {
+    result : result,
+    selectedRole : Id('selectedRole').value,
+    rName : Id('inRoom_rName').value,
+    color : Id('myColor').value,
+    isConfused : isConfused
+  });
+}
+ClientSoc.on()
+
+function isRolemodalClosed() {
+  if ( Id('modal_Role').style.display == "none") return true;
+  else return false;
+}
+
 ClientSoc.on('before_initboard', (k)=> {
-  Id('limit').innerText =""+ `${k}초 뒤 초기화됩니다.`;
+  if ( Id('limit'))
+    Id('limit').innerText =""+ `${k}초 뒤 초기화됩니다.`;
 });
 ClientSoc.on('initboard', ()=> {
   Id('nameSwitching_left').innerHTML = nameSwitching_Initialize();

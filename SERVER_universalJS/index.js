@@ -188,14 +188,14 @@ proto.events = function(submitList, rName, gameList, isConfused){
   //
   if ( events.alphabetaE == false) {
     if ( (colrole[colorA] == 'Alpha') && (colrole[colorB] == 'Beta')) {
-      whisper(colorA, sockets, colsoc, '베타와 만났습니다. 베타와 자동동맹됩니다.');
-      whisper(colorB, sockets, colsoc, '알파와 만났습니다. 알파와 자동동맹됩니다.');
+      whisper(colorA, colorB, sockets, colsoc, '베타와 만났습니다.');
+      whisper(colorB, colorA, sockets, colsoc, '알파와 만났습니다.');
       auto_ally(colorA, colorB, sockets, colsoc);
       events.alphabetaE = true;
     }
     else if ( (colrole[colorA] == 'Beta') && (colrole[colorA] == 'Alpha') ) {
-      whisper(colorA, sockets, colsoc, '알파와 만났습니다. 알파와 자동동맹됩니다.');
-      whisper(colorB, sockets, colsoc, '베타와 만났습니다. 베타와 자동동맹됩니다.');
+      whisper(colorA, colorB, sockets, colsoc, '알파와 만났습니다.');
+      whisper(colorB, colorA, sockets, colsoc, '베타와 만났습니다.');
       auto_ally(colorA, colorB, sockets, colsoc);
       events.alphabetaE = true;
       }
@@ -205,16 +205,16 @@ proto.events = function(submitList, rName, gameList, isConfused){
     if ( isConfused == true) {
       if ( colrole[colorA] == 'Beta') {
         if ( colrole[colorB] == 'EVE' || colrole[colorB] == 'V') {
-          whisper(colorA, sockets, colsoc, '이브 또는 V와 만났습니다. 자동동맹 됩니다.');
-          whisper(colorB, sockets, colsoc, '베타 또는 루비와 만났습니다. 자동동맹 됩니다.');
+          whisper(colorA, colorB, sockets, colsoc, '이브 또는 V와 만났습니다.');
+          whisper(colorB, colorA, sockets, colsoc, '베타 또는 루비와 만났습니다.');
           auto_ally(colorA, colorB, sockets, colsoc);
           events.betaE = true;
         }
       }
       else if (colrole[colorB] == 'Beta') {
         if ( colrole[colorA] == 'EVE' || colrole[colorA] == 'V') {
-          whisper(colorA, sockets, colsoc, '베타 또는 루비와 만났습니다. 자동동맹 됩니다.');
-          whisper(colorB, sockets, colsoc, '이브 또는 V와 만났습니다. 자동동맹 됩니다.');
+          whisper(colorA, colorB, sockets, colsoc, '베타 또는 루비와 만났습니다.');
+          whisper(colorB, colorA, sockets, colsoc, '이브 또는 V와 만났습니다.');
           auto_ally(colorA, colorB, sockets, colsoc);
           events.betaE = true;
         }
@@ -225,16 +225,16 @@ proto.events = function(submitList, rName, gameList, isConfused){
   if ( events.rubyE == false) {
     if ( colrole[colorA] == 'Ruby') {
       if ( (colrole[colorB] == 'EVE') || colrole[colorB] == 'V') {
-        whisper(colorA, sockets, colsoc, '이브 또는 V와 만났습니다. 자동동맹 됩니다.');
-        whisper(colorB, sockets, colsoc, '베타 또는 루비와 만났습니다. 자동동맹 됩니다.');
+        whisper(colorA, colorB, sockets, colsoc, '이브 또는 V와 만났습니다.');
+        whisper(colorB, colorA, sockets, colsoc, '베타 또는 루비와 만났습니다.');
         auto_ally(colorA, colorB, sockets, colsoc);
         gameList[rName].events.rubyE = true;
       }
     }
     else if ( colrole[colorB] == 'Ruby') {
       if ( colrole[colorA] == 'EVE' || colrole[colorA] == 'V') {
-        whisper(colorA, sockets, colsoc, '베타 또는 루비와 만났습니다. 자동동맹 됩니다.');
-        whisper(colorB, sockets, colsoc, '이브 또는 V와 만났습니다. 자동동맹 됩니다.');
+        whisper(colorA, colorB, sockets, colsoc, '베타 또는 루비와 만났습니다.');
+        whisper(colorB, colorA, sockets, colsoc, '이브 또는 V와 만났습니다.');
         auto_ally(colorA, colorB, sockets, colsoc);
         gameList[rName].events.rubyE = true;
       }
@@ -262,14 +262,16 @@ function sleep(t) {
     }, t);
   });
 }
-function whisper(color, sockets, colsoc, announce) {
+function whisper(color1, color2, sockets, colsoc, announce) {
 
-  var sid = colsoc[color];
+  var sid = colsoc[color1];
   for ( var k=0; k < sockets.length; k++)
     if ( sid == sockets[k].id)
       break;
   sockets[k].emit('switchingE', {
-    announce : announce
+    announce1 : announce,
+    color : color2,
+    announce2 : '과 자동동맹 됩니다.'
   });
 }
 proto.init_ally = async function(socket, soclist, rName) {
@@ -302,6 +304,7 @@ function SETTING(gameList, io, rName, allsoc) {
     gameList[rName].isAlive = { 'Alpha' : true, 'Beta' : true, 'Chaos' : true, 'Q' : true, 'V' : true, 'EVE' : true, 'Ruby' : true, 'Tetto' : true};
     gameList[rName].victoryCount = 0;
     gameList[rName].sockets = allsoc[rName];
+    gameList[rName].isOn = false;
     gameList[rName].failCounts = { 'Alpha' : 0, 'Beta' : 0, 'Chaos' : 0, 'Q' : 0, 'V' : 0, 'EVE' : 0, 'Ruby' : 0, 'Tetto' : 0};
     var shuffleRole = shuffle(['Beta', 'Chaos', 'EVE', 'Ruby', 'Tetto']);
     gameList[rName].events = {};
@@ -309,8 +312,9 @@ function SETTING(gameList, io, rName, allsoc) {
     gameList[rName].events.betaE = false;
     gameList[rName].events.rubyE = false;
     gameList[rName].events.tettoE = {'Alpha' : shuffleRole[0], 'Q' : shuffleRole[1], 'V': shuffleRole[2]};
-
-    resolve(0);
+    setTimeout(()=>{
+      resolve(0);
+    }, 100);
   });
 }
 module.exports = universal;

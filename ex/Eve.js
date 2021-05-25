@@ -67,7 +67,7 @@ ClientSoc.on('EVE_2', (response)=>{
   }
 });
 ClientSoc.on('switchingE', (response)=>{
-  briefing('', response.announce);
+  briefing('', response.announce1 +" "+ IMG(response.color)+" "+response.announce2);
 });
 function skill_disabled() {
   disabled('카오스_검거');
