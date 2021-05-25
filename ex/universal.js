@@ -27,11 +27,14 @@ function init_variable() {
   isDetective = false;
 }
 ClientSoc.on('start_Response', (response)=>{
+
   init_variable();
+
   realTime_inRoom_STOP();
   console.log("start");
   var role = response.role;
   var color = response.color;
+
   fetch_charHTML(role, color, response.sid)
     .then((resolve)=>{
       Id('inRoom_rName').value = response.rName;
@@ -40,11 +43,13 @@ ClientSoc.on('start_Response', (response)=>{
       Id('switching_cancel').disabled = true;
       Id('game_colorName').innerHTML = IMG(color);
       Id('game_colorName').setAttribute('style', `background-color : ${color}`);
+
       var oScript = document.createElement('script');
       oScript.type ='text/javascript';
       oScript.charset ='utf-8';
       oScript.src = 'ex/'+role+'.js';
       document.getElementsByTagName('head')[0].appendChild(oScript);
+
       classAttr('help', 'onMouseEnter', 'helpOn(this.id);');
       classAttr('help', 'onMouseLeave', 'helpOff();');
       classAttr('Skillbutton','onclick', 'clickSkill(this)');
