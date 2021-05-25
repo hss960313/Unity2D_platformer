@@ -380,7 +380,6 @@ function reUseWait(eid, coolTime) {
     skillCool(eid, coolTime);
   }
 }
-var coolTime = 120;
 function skillCool(eid, coolTime) {
   var a = setInterval(()=>{
     if ( Id(eid))
