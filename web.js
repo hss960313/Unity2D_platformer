@@ -244,6 +244,12 @@ socket.on('disconnect', async function() {
   var list = [];
   var a = await DB.getLoca(serverDB, sid, list);
   var rName = list[0].nowLocation;
+  var key = '';
+  for (let k=0; k < allsoc[rName].length; k++) {
+    if ( sid == allsoc[rName][k].id)
+      allsoc[rName].splice(k, 1);
+      break;
+  }
   if ( rName == 'lobby') {
     lobby.ANNOUNCE(io, `${socket.id} 님이 로비에서 떠났습니다.`);
   }
