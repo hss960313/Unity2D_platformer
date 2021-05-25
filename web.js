@@ -315,7 +315,11 @@ io.on('connection', function(socket) {
       var destination = '/game';
       inRoom.redirect(socket, destination);
     });
+    //
+    //
 }); // end of io.on
+//
+//
 
 
 function sleep(t){
