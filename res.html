@@ -1,0 +1,25 @@
+<html>
+<HEAD>
+  <TITLE>** GAME **</TITLE>
+  <script src="ex/socketio.js"></script>
+  <script>
+  var ClientSoc = io.connect();
+  function Id(id) {
+    return document.getElementById(id);
+  }
+  function fixBelow(chatbox) {
+    if ( Id(chatbox) ) {
+      var objDiv = Id(chatbox);
+      objDiv.scrollTop = objDiv.scrollHeight;
+    }
+  }
+  </script>
+  <script src="func.js"></script>
+</HEAD>
+<link rel="stylesheet" href="/ex/lobby_style.css">
+<link rel="stylesheet" href="/ex/joinProcess_style.css">
+<link rel="stylesheet" href="/ex/inRoom_style.css">
+<link rel="stylesheet" href="/ex/universal_style.css">
+<body id="body_ALL"></body>
+</html>
+  

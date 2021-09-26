@@ -3,12 +3,102 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
+        <title>HSS</title>
     </head>
     <body>
-        <script type="text/javascript" src="/func.js"></script>
-        <p>Hello world!</p>
-        <a href="/write">INSERT</a>
-        <input type="button" onclick="webfunc()" id = "myb" value="클릭">
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://www.promisejs.org/polyfills/promise-6.1.0.js"></script>
+        <script type="text/javascript" src="func.js"></script>
+        <script>
+        var ClientSoc = io.connect();
+        function Id(id) {
+          return document.getElementById(id);
+        }
+         
+ClientSoc.on('1', (from)=>{
+  if ( from == 'success') {
+    alert("캐릭생성에 성공했습니다.")
+  }
+  else {
+    alert("캐릭생성에 실패했습니다.")
+  }
+});
+ClientSoc.on('2', (from)=>{
+  console.log("2'");
+  if ( from == 'success') {
+    alert("계정생성에 성공했습니다.");
+  }
+  else {
+    alert("계정생성에 실패했습니다.");
+  }
+});
+ClientSoc.on('3', (from)=>{
+  console.log("3'");
+  if ( from == 'success') {
+    alert("캐릭삭제에 성공했습니다.");
+  }
+  else {
+    alert("캐릭삭제에 실패했습니다.");
+  }
+});
+ClientSoc.on('4', (from)=>{
+  console.log("4'");
+  if ( from == 'success') {
+    alert("계정삭제에 성공했습니다.");
+  }
+  else {
+    alert("계정삭제에 실패했습니다.");
+  }
+});
+ClientSoc.on('5', (toClient)=>{
+  console.log("5'");
+  if ( toClient[0] != undefined ) {
+    var s = '';
+    for ( var k =0; k < toClient.length; k++)
+      s += toClient[k] + "  ";
+    alert("계정리스트 : "+s);
+  }
+  else 
+  alert("계정리스트가 비어있습니다.");
+});
+ClientSoc.on('6', (toClient)=>{
+    console.log("6'");
+    if ( toClient[0] != undefined) {
+        var s = '';
+        for ( var k =0; k < toClient.length; k++)
+            s += toClient[k] + "  ";
+        alert("모든캐릭리스트 : "+s);
+    }
+    else
+        alert("모든캐릭터리스트가 비어있습니다.");
+});
+ClientSoc.on('7', (from)=>{
+  console.log("7");
+  if ( from.res == '1' && from.toClient != undefined) {
+    alert(form.toClient);
+  }
+});
+ClientSoc.on('8', (from)=>{
+  console.log("8'");
+  if ( from == 'success') {
+    alert("DB아이디비밀번호와 일치함");
+  }
+  else {
+    alert("DB아이디비밀번호와 일치하지않음");
+  }
+});
+
+        </script>
+        <h1><a href="/game">추리게임으로</a></h1><p></p>
+        <h1>DB함수들</h1>
+        <input type="button" value="DB.newCharacter" onclick="fetch_html(1);"></p>
+        <input type="button" value="DB.newAccount" onclick="fetch_html(2);"></p>
+        <input type="button" value="DB.deleteCharacter" onclick="fetch_html(3);"></p>
+        <input type="button" value="DB.deleteAccount" onclick="fetch_html(4);"></p>
+        <input type="button" value="DB.getAccountList" onclick="fetch_html(5);"></p>
+        <input type="button" value="DB.getAllCharacterList" onclick="fetch_html(6);"></p>
+        <input type="button" value="DB.getIdCharacterList" onclick="fetch_html(7);"></p>
+        <input type="button"  value="DB.checkLogin" onclick="fetch_html(8);"></p>
+        <div id ="showresult"></div>
     </body>
 </html>
